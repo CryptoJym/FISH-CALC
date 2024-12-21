@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="/">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FISH CERTs Purchase Simulator</title>
+    <!-- Link to external stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- Include Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap">
+    <!-- Include Chart.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>FISH (CERT) Collection</h1>
+        <h2>Select Your FISH CERTs</h2>
+        <div class="collection-container" id="cert-collection">
+            <!-- Certification Cards will be dynamically generated here -->
+        </div>
+    </div>
+    <div id="purchase-button-container">
+        <button id="purchase-button">Create Collection</button>
+        <div id="global-counter">
+            <div class="counter-item">
+                <div class="counter-content">
+                    <div class="counter-label">Total CERTs: <span class="counter-value">0</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div id="user-collection"></div>
+        <div id="token-price-container">
+            <h2>Set Token Price</h2>
+            <div id="token-price-section">
+                <div class="token-price-option">
+                    <input type="radio" id="price1" name="token-price" value="0.0025" checked>
+                    <label for="price1">$0.0025/FISH</label>
+                </div>
+                <div class="token-price-option">
+                    <input type="radio" id="price2" name="token-price" value="0.025">
+                    <label for="price2">$0.025/FISH</label>
+                </div>
+                <div class="token-price-option">
+                    <input type="radio" id="price3" name="token-price" value="0.25">
+                    <label for="price3">$0.25/FISH</label>
+                </div>
+                <div class="token-price-option">
+                    <input type="radio" id="price4" name="token-price" value="0.5">
+                    <label for="price4">$0.50/FISH</label>
+                </div>
+                <div class="token-price-option">
+                    <input type="radio" id="price5" name="token-price" value="1.25">
+                    <label for="price5">$1.25/FISH</label>
+                </div>
+            </div>
+        </div>
+        <div id="financial-projections-container">
+            <h2>Rewards Potential</h2>
+            <div id="financial-projections"></div>
+        </div>
+        <div id="graph-container">
+            <h2>Daily Harvesting & Rewards Analysis</h2>
+            <div id="graph-section">
+                <div id="graph-toggle">
+                    <button class="graph-toggle-button active" data-type="harvesting">Harvesting Graph</button>
+                    <button class="graph-toggle-button" data-type="cor">COR Graph</button>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chartCanvas"></canvas>
+                </div>
+                <div id="phase2-toggle">
+                    <h2>Customize Phase 2 Start</h2>
+                    <div class="phase2-buttons">
+                        <button class="phase2-button" data-year="1">Year 1</button>
+                        <button class="phase2-button" data-year="2">Year 2</button>
+                        <button class="phase2-button" data-year="3">Year 3</button>
+                        <button class="phase2-button" data-year="4">Year 4</button>
+                        <button class="phase2-button active" data-year="5">Year 5</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Link to external JavaScript file -->
+    <script src="scripts.js"></script>
+</body>
+</html>
