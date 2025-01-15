@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
         {
             id: 'angel-fish',
             name: 'Angel-FISH',
-            imageSrc: 'assets/icon--angel-fish-colors--teal-cyan-with-deep-blue-.svg',
+            imageSrc: 'assets/icon--angel-fish-colors--teal-cyan-with-deep-blue-.png',
             altText: 'Angel-FISH Icon',
             totalCerts: 15000,
             harvestEfficiency: '25%',
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         {
             id: 'cod-fish',
             name: 'Cod-FISH',
-            imageSrc: 'assets/COD FISH CERT.svg',
+            imageSrc: 'assets/COD FISH CERT.png',
             altText: 'Cod-FISH Icon',
             totalCerts: 12500,
             harvestEfficiency: '50%',
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
         {
             id: 'tuna-fish',
             name: 'Tuna-FISH',
-            imageSrc: 'assets/icon--tuna-colors--teal-cyan-with-deep-blue-highli.svg',
+            imageSrc: 'assets/icon--tuna-colors--teal-cyan-with-deep-blue-highli.png',
             altText: 'Tuna-FISH Icon',
             totalCerts: 10000,
             harvestEfficiency: '75%',
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
         {
             id: 'sword-fish',
             name: 'Sword-FISH',
-            imageSrc: 'assets/SWORD FISH CERT.svg',
+            imageSrc: 'assets/SWORD FISH CERT.png',
             altText: 'Sword-FISH Icon',
             totalCerts: 7500,
             harvestEfficiency: '100%',
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
         {
             id: 'king-fish',
             name: 'King-FISH',
-            imageSrc: 'assets/icon--kingfish-colors--teal-cyan-with-deep-blue-hi.svg',
+            imageSrc: 'assets/icon--kingfish-colors--teal-cyan-with-deep-blue-hi.png',
             altText: 'King-FISH Icon',
             totalCerts: 5000,
             harvestEfficiency: '125%',
