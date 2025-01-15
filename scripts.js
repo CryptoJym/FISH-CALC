@@ -461,12 +461,40 @@ document.addEventListener('DOMContentLoaded', () => {
         updateCalculations();
     });
 
+    function recalcAllCards() {
+        certCards.forEach(card => {
+            const inputField = card.querySelector('.cert-counter input');
+            const quantity = parseInt(inputField.value) || 0;
+            
+            const cardId = card.id;
+            const dataItem = certData.find(d => d.id === cardId);
+            const totalCost = calculateTotalCost(quantity, dataItem.startingPrice, dataItem.incrementAmount, dataItem.incrementInterval);
+
+            const dailyHarvestPerCert = dataItem.minHarvestPerDayPerCert;
+            const totalDailyHarvest = dailyHarvestPerCert * quantity;
+
+            const dailyIncomeEl = card.querySelector('.roi-estimate .daily-income');
+            const breakEvenEl = card.querySelector('.roi-estimate .break-even');
+            if (dailyIncomeEl && breakEvenEl) {
+                const dailyUSD = totalDailyHarvest * selectedTokenPrice;
+                dailyIncomeEl.textContent = `$${dailyUSD.toFixed(2)}`;
+
+                let breakEvenDays = '--';
+                if (dailyUSD > 0) {
+                    breakEvenDays = (totalCost / dailyUSD).toFixed(1) + ' days';
+                }
+                breakEvenEl.textContent = breakEvenDays;
+            }
+        });
+    }
+
     // Monitor token price radio buttons
     const tokenPriceOptions = document.getElementsByName('token-price');
     tokenPriceOptions.forEach(option => {
         option.addEventListener('change', () => {
             selectedTokenPrice = parseFloat(option.value);
-            updateSummaryBar(); // so we refresh daily incomes
+            recalcAllCards();
+            updateSummaryBar();
             if (collectionCreated) {
                 updateCalculations();
             }
