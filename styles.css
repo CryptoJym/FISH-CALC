@@ -809,6 +809,47 @@ button:hover {
     color: var(--background-color);
 }
 
+/* Global Minted Controls */
+#global-minted-controls {
+    background: var(--card-background);
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px auto;
+    max-width: 600px;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+}
+
+#global-minted-controls h2 {
+    margin-top: 0;
+}
+
+.slider-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.slider-group {
+    display: grid;
+    grid-template-columns: 120px 1fr 60px;
+    align-items: center;
+    gap: 10px;
+}
+
+.slider-group label {
+    color: var(--secondary-color);
+}
+
+.slider-group input[type="range"] {
+    width: 100%;
+    accent-color: var(--primary-color);
+}
+
+.slider-value {
+    color: var(--primary-color);
+    text-align: right;
+}
+
 /* Hide sections initially */
 #token-price-container,
 #financial-projections-container,

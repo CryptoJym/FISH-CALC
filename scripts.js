@@ -185,6 +185,18 @@ document.addEventListener('DOMContentLoaded', () => {
     createCertCards();
     const certCards = document.querySelectorAll('.cert-card');
 
+    // Setup global minted sliders
+    certData.forEach(cert => {
+        const slider = document.getElementById(`${cert.id}-global-range`);
+        const valueSpan = document.getElementById(`${cert.id}-val`);
+        
+        slider.addEventListener('input', (e) => {
+            const value = e.target.value;
+            valueSpan.textContent = `${value}%`;
+            updateGlobalMinted(cert.id, parseInt(value));
+        });
+    });
+
     // 1.4. We might also have a UI for global minted percentages. 
     // This code snippet assumes you have sliders or inputs somewhere 
     // that call `updateGlobalMinted(fishId, newPercent)`.
