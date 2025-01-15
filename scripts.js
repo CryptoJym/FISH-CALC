@@ -626,12 +626,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         },
                     },
                     y: {
-                        beginAtZero: true,
+                        type: graphType === 'cor' ? 'logarithmic' : 'linear',
                         grid: { color: 'rgba(0, 255, 255, 0.2)' },
                         ticks: {
                             color: '#00ffff',
                             font: { family: 'Orbitron', size: 14 },
-                            padding: 10
+                            padding: 10,
+                            callback: function(value) {
+                                return value + (graphType === 'cor' ? '%' : '');
+                            }
                         },
                     },
                 },
