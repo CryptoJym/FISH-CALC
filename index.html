@@ -18,21 +18,41 @@
         <h1>FISH (CERT) Collection</h1>
         <h2>Select Your FISH CERTs</h2>
         <div class="collection-container" id="cert-collection">
-            <!-- Certification Cards will be dynamically generated here -->
+            <!-- Certification Cards will be dynamically generated here by scripts.js -->
         </div>
     </div>
+
+    <!-- PURCHASE BUTTON + GLOBAL COUNTER -->
     <div id="purchase-button-container">
         <button id="purchase-button">Create Collection</button>
         <div id="global-counter">
             <div class="counter-item">
                 <div class="counter-content">
-                    <div class="counter-label">Total CERTs: <span class="counter-value">0</span></div>
+                    <div class="counter-label">
+                        Total CERTs:
+                        <span class="counter-value">0</span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- OPTIONAL: Floating Summary Bar -->
+    <!-- If you want a live summary of total CERTs, daily income, break-even, etc.,
+         be sure your scripts.js references these IDs (#summary-certs, #summary-daily, #summary-bep).
+         If you do NOT want a floating bar, remove this entire block. -->
+    <div id="floating-summary" class="floating-summary">
+        <p>Total CERTs: <span id="summary-certs">0</span></p>
+        <p>Est. Daily Income: <span id="summary-daily">$0</span></p>
+        <p>Break-even: <span id="summary-bep">-- days</span></p>
+    </div>
+    <!-- END Floating Summary Bar -->
+
     <div class="container">
+        <!-- USER COLLECTION -->
         <div id="user-collection"></div>
+
+        <!-- TOKEN PRICE -->
         <div id="token-price-container">
             <h2>Set Token Price</h2>
             <div id="token-price-section">
@@ -58,10 +78,14 @@
                 </div>
             </div>
         </div>
+
+        <!-- FINANCIAL PROJECTIONS -->
         <div id="financial-projections-container">
             <h2>Rewards Potential</h2>
             <div id="financial-projections"></div>
         </div>
+
+        <!-- CHART / GRAPH SECTION -->
         <div id="graph-container">
             <h2>Daily Harvesting & Rewards Analysis</h2>
             <div id="graph-section">
@@ -72,6 +96,8 @@
                 <div class="chart-container">
                     <canvas id="chartCanvas"></canvas>
                 </div>
+
+                <!-- PHASE 2 TOGGLE -->
                 <div id="phase2-toggle">
                     <h2>Customize Phase 2 Start</h2>
                     <div class="phase2-buttons">
@@ -85,6 +111,7 @@
             </div>
         </div>
     </div>
+
     <!-- Link to external JavaScript file -->
     <script src="scripts.js"></script>
 </body>

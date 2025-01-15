@@ -20,6 +20,9 @@
     /* ADDED: More neutral background layer for text to improve readability */
     --card-content-bg: rgba(255, 255, 255, 0.06); 
     --highlight-color: #FFFFFF; /* Could be used for key highlights or emphasis */
+
+    /* NEW: tooltip background color */
+    --tooltip-bg: rgba(0, 0, 0, 0.85);
 }
 
 html {
@@ -79,8 +82,6 @@ h1 {
     font-size: clamp(1.5rem, 4vw, 2.5rem);
     text-align: center;
     margin: 20px 0;
-
-    /* CHANGED: Add stronger text-shadow for extra pop */
     text-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
 }
 
@@ -102,8 +103,6 @@ h2 {
     border-radius: 10px;
     box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
     margin-bottom: 40px;
-
-    /* ADDED: Slightly different background for readability */
     background-image: linear-gradient(
         to bottom right,
         rgba(0, 51, 102, 0.9),
@@ -189,8 +188,6 @@ h2 {
     flex-direction: column;
     justify-content: space-between;
     padding: 20px;
-
-    /* ADDED: Subtle background for text sections */
     background-image: linear-gradient(
         to bottom,
         var(--card-background),
@@ -213,7 +210,6 @@ h2 {
     border-radius: 5px;
     padding: 5px;
     margin-bottom: 5px;
-    /* CHANGED: A slightly lighter overlay so text stands out more */
     background: var(--card-content-bg);
 }
 
@@ -262,8 +258,6 @@ h2 {
     flex-direction: column;
     font-size: 1em;
     line-height: 1.5;
-
-    /* ADDED: Add a bit more spacing for readability */
     margin-top: 10px;
 }
 
@@ -271,8 +265,6 @@ h2 {
     margin: 5px 0;
     display: flex;
     justify-content: space-between;
-
-    /* OPTIONAL: Align text better on smaller devices or for new data labels */
     flex-wrap: wrap;
 }
 
@@ -286,7 +278,7 @@ h2 {
 
 .cert-details .value {
     text-align: right;
-    color: var(--highlight-color); /* Use highlight color to differentiate */
+    color: var(--highlight-color);
     width: 50%;
     padding-right: 0;
 }
@@ -298,30 +290,7 @@ h2 {
     text-align: right;
 }
 
-/* ADDED: Example tooltip style if you want to add "info" icons or tooltips. */
-/*
-.tooltip {
-    position: relative;
-    cursor: help;
-}
-
-.tooltip:hover::after {
-    content: attr(data-tooltip);
-    position: absolute;
-    bottom: 100%;
-    left: 0;
-    padding: 5px 8px;
-    background-color: rgba(0,0,0,0.7);
-    color: #fff;
-    font-size: 0.8em;
-    border-radius: 5px;
-    white-space: nowrap;
-    transform: translateY(-5px);
-    pointer-events: none;
-    z-index: 999;
-}
-*/
-
+/* Purchase Button */
 .purchase-button {
     background-color: transparent;
     color: var(--primary-color);
@@ -343,6 +312,7 @@ h2 {
     color: var(--background-color);
 }
 
+/* Counter */
 .cert-counter {
     display: flex;
     align-items: center;
@@ -706,7 +676,7 @@ h2 {
     max-width: 600px;
 }
 
-/* Media Queries */
+/* MEDIA QUERIES FOR RESPONSIVENESS */
 @media (max-width: 1200px) {
     #chartCanvas {
         width: 1000px;
@@ -808,3 +778,59 @@ button:hover {
 #user-collection {
     display: none;
 }
+
+/* NEW: Floating Summary Bar */
+.floating-summary {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px;
+    box-shadow: 0 -2px 10px rgba(0,255,255,0.3);
+    z-index: 9999;
+    color: var(--primary-color);
+    font-size: 0.9em;
+}
+
+.floating-summary p {
+    margin: 0;
+    font-weight: bold;
+}
+
+/* NEW: Custom tooltip for info-icons */
+.info-icon {
+    display: inline-block;
+    margin-left: 5px;
+    background-color: var(--secondary-color);
+    color: var(--background-color);
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    font-size: 12px;
+    text-align: center;
+    line-height: 16px;
+    cursor: help;
+    position: relative;
+    font-weight: bold;
+}
+
+/* The actual tooltip bubble */
+.custom-tooltip {
+    position: absolute;
+    background: var(--tooltip-bg);
+    color: #fff;
+    padding: 5px 8px;
+    border-radius: 5px;
+    font-size: 0.8em;
+    pointer-events: none;
+    transform: translateX(0);
+    white-space: nowrap;
+}
+
+/*
+    NOTE: the .custom-tooltip is dynamically added by the JS code when you hover
+    over .info-icon. You can style transitions or arrow elements as needed.
+*/

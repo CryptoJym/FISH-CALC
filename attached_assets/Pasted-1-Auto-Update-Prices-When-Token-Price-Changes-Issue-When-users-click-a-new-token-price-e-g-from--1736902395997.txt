@@ -1,0 +1,59 @@
+1. Auto-Update Prices When Token Price Changes
+Issue: When users click a new token price (e.g. from $0.025 to $0.50), you want the card backs (daily income & break-even) to immediately recalculate. Right now, it’s only recalculating those values when the user changes the CERT quantity (plus/minus).
+
+Solution: Factor out the logic that updates each card’s daily income and break-even into a reusable function, then call it whenever the token price changes.
+
+Here’s a simple approach:
+
+In your scripts.js, create a helper function (e.g. recalcAllCards()) that loops through all .cert-cards and recalculates the “Est. Daily Income” and “Break-even” using the currently selected token price.
+
+Whenever someone changes the radio button for token price, call:
+
+js
+Copy code
+selectedTokenPrice = parseFloat(option.value);
+recalcAllCards();       // recalc daily $ & break-even on every card
+updateSummaryBar();     // re-run the floating summary
+if (collectionCreated) {
+    updateCalculations();  // re-run the chart and projection table
+}
+Your recalcAllCards() can reuse the same math you do in updateCounters(). For example:
+
+js
+Copy code
+function recalcAllCards() {
+  certCards.forEach(card => {
+    const inputField = card.querySelector('.cert-counter input');
+    const quantity = parseInt(inputField.value) || 0;
+    
+    // Then do the same daily harvest, total cost, break-even, etc. 
+    // that you do in updateCounters, but skipping the part about 
+    // changing quantity or global counters.
+    // e.g.:
+    const cardId = card.id;
+    const dataItem = certData.find(d => d.id === cardId);
+    const totalCost = calculateTotalCost(quantity, dataItem.startingPrice, dataItem.incrementAmount, dataItem.incrementInterval);
+
+    const dailyHarvestPerCert = dataItem.minHarvestPerDayPerCert;
+    const totalDailyHarvest = dailyHarvestPerCert * quantity;
+
+    // Update the "Min Harvest/Day" if you want it to reflect quantity, 
+    // or keep it a per-CERT value—your choice.
+
+    const dailyIncomeEl = card.querySelector('.roi-estimate .daily-income');
+    const breakEvenEl = card.querySelector('.roi-estimate .break-even');
+    if (dailyIncomeEl && breakEvenEl) {
+      const dailyUSD = totalDailyHarvest * selectedTokenPrice;
+      dailyIncomeEl.textContent = `$${dailyUSD.toFixed(2)}`;
+
+      let breakEvenDays = '--';
+      if (dailyUSD > 0) {
+        breakEvenDays = (totalCost / dailyUSD).toFixed(1) + ' days';
+      }
+      breakEvenEl.textContent = breakEvenDays;
+    }
+  });
+}
+Finally, in your tokenPriceOptions.forEach(...) code, just call recalcAllCards() along with updateSummaryBar() and updateCalculations().
+
+With this, whenever the user picks a new token price, all cards instantly recalc daily income and break-even without waiting for quantity changes.
