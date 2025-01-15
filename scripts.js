@@ -699,6 +699,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const table = document.createElement('table');
         table.classList.add('projection-table');
 
+        // Create thead and tbody
+        const thead = document.createElement('thead');
+        const tbody = document.createElement('tbody');
+        
         // Header row
         const headerRow = document.createElement('tr');
         const firstHeaderCell = document.createElement('th');
@@ -710,34 +714,76 @@ document.addEventListener('DOMContentLoaded', () => {
             th.textContent = certName;
             headerRow.appendChild(th);
         }
-        table.appendChild(headerRow);
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        // Define tooltips for each row
+        const tooltips = {
+            investment: 'Total cost of CERTs purchased',
+            dailyValue: 'Estimated daily earnings based on current token price',
+            monthlyValue: 'Estimated monthly earnings (daily × 30)',
+            yearlyValue: 'Estimated yearly earnings (daily × 365)',
+            corY1: 'Cumulative % Return after Year 1',
+            corY3: 'Cumulative % Return after Year 3',
+            corY5: 'Cumulative % Return after Year 5',
+            corY10: 'Cumulative % Return after Year 10'
+        };
 
         // Rows
         const rows = [
             { label: 'CERTs Purchased', key: 'investment', format: (v) => `$${v.toLocaleString()}` },
-            { label: 'Daily Value',      key: 'dailyValue', format: (v) => `$${v.toFixed(2)}` },
-            { label: 'Monthly Value',    key: 'monthlyValue', format: (v) => `$${v.toFixed(2)}` },
-            { label: 'Yearly Value',     key: 'yearlyValue', format: (v) => `$${v.toFixed(2)}` },
-            { label: 'COR Y1',          key: 'corY1',       format: (v) => `${v.toFixed(2)}%` },
-            { label: 'COR Y3',          key: 'corY3',       format: (v) => `${v.toFixed(2)}%` },
-            { label: 'COR Y5',          key: 'corY5',       format: (v) => `${v.toFixed(2)}%` },
-            { label: 'COR Y10',         key: 'corY10',      format: (v) => `${v.toFixed(2)}%` },
+            { label: 'Daily Value', key: 'dailyValue', format: (v) => `$${v.toFixed(2)}` },
+            { label: 'Monthly Value', key: 'monthlyValue', format: (v) => `$${v.toFixed(2)}` },
+            { label: 'Yearly Value', key: 'yearlyValue', format: (v) => `$${v.toFixed(2)}` },
+            { label: 'COR Y1', key: 'corY1', format: (v) => `${v.toFixed(2)}%` },
+            { label: 'COR Y3', key: 'corY3', format: (v) => `${v.toFixed(2)}%` },
+            { label: 'COR Y5', key: 'corY5', format: (v) => `${v.toFixed(2)}%` },
+            { label: 'COR Y10', key: 'corY10', format: (v) => `${v.toFixed(2)}%` },
         ];
 
         rows.forEach(row => {
             const tr = document.createElement('tr');
             const labelCell = document.createElement('td');
-            labelCell.textContent = row.label;
+            
+            // Add label with tooltip
+            const labelSpan = document.createElement('span');
+            labelSpan.textContent = row.label;
+            labelCell.appendChild(labelSpan);
+            
+            if (tooltips[row.key]) {
+                const infoIcon = document.createElement('span');
+                infoIcon.className = 'info-icon';
+                infoIcon.textContent = '?';
+                infoIcon.setAttribute('data-tooltip', tooltips[row.key]);
+                labelCell.appendChild(infoIcon);
+            }
+            
             tr.appendChild(labelCell);
 
+            // Find max and min values for this row
+            const values = Object.values(projectionData).map(data => data[row.key]);
+            const maxVal = Math.max(...values);
+            const minVal = Math.min(...values);
+
+            // Add data cells
             for (const certName in projectionData) {
                 const td = document.createElement('td');
                 const val = projectionData[certName][row.key];
                 td.textContent = row.format(val);
+                
+                // Highlight max/min values
+                if (val === maxVal && values.length > 1) {
+                    td.classList.add('highlight-max');
+                } else if (val === minVal && values.length > 1) {
+                    td.classList.add('highlight-min');
+                }
+                
                 tr.appendChild(td);
             }
-            table.appendChild(tr);
+            tbody.appendChild(tr);
         });
+        
+        table.appendChild(tbody);
 
         const tableContainer = document.createElement('div');
         tableContainer.classList.add('table-container');

@@ -590,15 +590,53 @@ h2 {
     text-align: center;
     color: var(--primary-color);
     white-space: nowrap;
+    position: relative;
 }
 
-.projection-table th {
-    background-color: var(--card-background);
+.projection-table thead th {
+    position: sticky;
+    top: 0;
+    background-color: rgba(0, 51, 102, 0.95);
     color: var(--secondary-color);
+    z-index: 10;
+}
+
+.projection-table tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.04);
+}
+
+.projection-table tr:hover {
+    background-color: rgba(255, 255, 255, 0.08);
 }
 
 .table-container {
     overflow-x: auto;
+    max-height: 500px;
+}
+
+.projection-table .highlight-max {
+    color: #39FF14;
+}
+
+.projection-table .highlight-min {
+    color: #FF3D3D;
+}
+
+.projection-table .info-icon {
+    font-size: 10px;
+    width: 14px;
+    height: 14px;
+    line-height: 14px;
+    margin-left: 4px;
+    vertical-align: super;
+}
+
+@media (max-width: 768px) {
+    .projection-table td,
+    .projection-table th {
+        font-size: 0.9em;
+        padding: 10px;
+    }
 }
 
 /* User Collection */
