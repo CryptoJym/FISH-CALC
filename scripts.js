@@ -13,6 +13,9 @@ document.addEventListener('DOMContentLoaded', () => {
             weightingFactor: 0.25,
             phase2Multiplier: 2,
             certColor: '#0AFFFF',
+            startingPriceDisplay: '$25',
+            incrementAmount: 10,
+            incrementInterval: 100,
         },
         {
             id: 'cod-fish',
@@ -23,6 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
             weightingFactor: 0.50,
             phase2Multiplier: 2,
             certColor: '#FC54FF',
+            startingPriceDisplay: '$35',
+            incrementAmount: 15,
+            incrementInterval: 100,
         },
         {
             id: 'tuna-fish',
@@ -33,6 +39,9 @@ document.addEventListener('DOMContentLoaded', () => {
             weightingFactor: 0.75,
             phase2Multiplier: 3,
             certColor: '#FFE800',
+            startingPriceDisplay: '$45',
+            incrementAmount: 20,
+            incrementInterval: 100,
         },
         {
             id: 'sword-fish',
@@ -43,6 +52,9 @@ document.addEventListener('DOMContentLoaded', () => {
             weightingFactor: 1.00,
             phase2Multiplier: 4,
             certColor: '#FF3D3D',
+            startingPriceDisplay: '$55',
+            incrementAmount: 25,
+            incrementInterval: 100,
         },
         {
             id: 'king-fish',
@@ -53,6 +65,9 @@ document.addEventListener('DOMContentLoaded', () => {
             weightingFactor: 1.25,
             phase2Multiplier: 5,
             certColor: '#39FF14',
+            startingPriceDisplay: '$65',
+            incrementAmount: 30,
+            incrementInterval: 100,
         },
     ];
 
