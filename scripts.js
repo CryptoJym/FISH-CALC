@@ -1,25 +1,17 @@
-/* scripts.js */
-
+// scripts.js
 document.addEventListener('DOMContentLoaded', () => {
-    // -----------------------
-    // 1. CERT DATA
-    // -----------------------
+    /**************************************************************
+     *    1. CERT DATA + GLOBAL SETTINGS
+     **************************************************************/
     const certData = [
         {
             id: 'angel-fish',
             name: 'Angel-FISH',
             imageSrc: 'assets/icon--angel-fish-colors--teal-cyan-with-deep-blue-.png',
             altText: 'Angel-FISH Icon',
-            totalCerts: 15000,
-            // Renamed for clarity, but we’ll still store '25%' if you like
-            harvestEfficiency: '25%', 
-            priceStep: '$10/100',
-            startingPriceDisplay: '$25',
-            startingPrice: 25,
+            totalCerts: 15000, // max possible
+            weightingFactor: 0.25,
             phase2Multiplier: 2,
-            minHarvestPerDayPerCert: 60.165,
-            incrementAmount: 10,
-            incrementInterval: 100,
             certColor: '#0AFFFF',
         },
         {
@@ -28,14 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
             imageSrc: 'assets/COD FISH CERT.png',
             altText: 'Cod-FISH Icon',
             totalCerts: 12500,
-            harvestEfficiency: '50%',
-            priceStep: '$25/100',
-            startingPriceDisplay: '$250',
-            startingPrice: 250,
+            weightingFactor: 0.50,
             phase2Multiplier: 2,
-            minHarvestPerDayPerCert: 120.33,
-            incrementAmount: 25,
-            incrementInterval: 100,
             certColor: '#FC54FF',
         },
         {
@@ -44,14 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
             imageSrc: 'assets/icon--tuna-colors--teal-cyan-with-deep-blue-highli.png',
             altText: 'Tuna-FISH Icon',
             totalCerts: 10000,
-            harvestEfficiency: '75%',
-            priceStep: '$50/100',
-            startingPriceDisplay: '$500',
-            startingPrice: 500,
+            weightingFactor: 0.75,
             phase2Multiplier: 3,
-            minHarvestPerDayPerCert: 180.495,
-            incrementAmount: 50,
-            incrementInterval: 100,
             certColor: '#FFE800',
         },
         {
@@ -60,14 +40,8 @@ document.addEventListener('DOMContentLoaded', () => {
             imageSrc: 'assets/SWORD FISH CERT.png',
             altText: 'Sword-FISH Icon',
             totalCerts: 7500,
-            harvestEfficiency: '100%',
-            priceStep: '$75/100',
-            startingPriceDisplay: '$750',
-            startingPrice: 750,
+            weightingFactor: 1.00,
             phase2Multiplier: 4,
-            minHarvestPerDayPerCert: 240.66,
-            incrementAmount: 75,
-            incrementInterval: 100,
             certColor: '#FF3D3D',
         },
         {
@@ -76,96 +50,90 @@ document.addEventListener('DOMContentLoaded', () => {
             imageSrc: 'assets/icon--kingfish-colors--teal-cyan-with-deep-blue-hi.png',
             altText: 'King-FISH Icon',
             totalCerts: 5000,
-            harvestEfficiency: '125%',
-            priceStep: '$100/100',
-            startingPriceDisplay: '$1,000',
-            startingPrice: 1000,
+            weightingFactor: 1.25,
             phase2Multiplier: 5,
-            minHarvestPerDayPerCert: 300.825,
-            incrementAmount: 100,
-            incrementInterval: 100,
             certColor: '#39FF14',
         },
     ];
 
-    // If you want a floating summary bar, ensure you have something like:
-    // <div id="floating-summary" class="floating-summary">
-    //   <p>Total CERTs: <span id="summary-certs">0</span></p>
-    //   <p>Est. Daily Harvest: <span id="summary-daily">0</span></p>
-    //   <p>Break-even: <span id="summary-bep">-- days</span></p>
-    // </div>
-    //
-    // in your HTML. Then this script will update it automatically.
+    // 1.1. This is the total staker pool for 10 years: 5.49e9
+    // The distribution halved each year:
+    //   Year 1 = 2.745e9
+    //   Year 2 = 1.3725e9
+    //   ...
+    const totalStakerPool = 5.49e9;  
 
-    // Grab references
-    const collectionContainer = document.getElementById('cert-collection');
-    const globalLicenseCounter = document.querySelector('#global-counter .counter-value');
-    const userCollectionDiv = document.getElementById('user-collection');
-    const tokenPriceContainer = document.getElementById('token-price-container');
-    const financialProjectionsContainer = document.getElementById('financial-projections-container');
-    const graphContainer = document.getElementById('graph-container');
+    // We'll store the "global minted percentage" for each fish,
+    // e.g. if user sets 50% for Angel-FISH => 7500 minted globally.
+    let globalPercentMinted = {
+        'angel-fish': 50,
+        'cod-fish': 50,
+        'tuna-fish': 50,
+        'sword-fish': 50,
+        'king-fish': 50
+    };
 
-    const purchaseButton = document.getElementById('purchase-button');
-    const financialProjections = document.getElementById('financial-projections');
-
-    // We'll track if the user created a collection
-    let collectionCreated = false;
-    let totalLicensesOwned = 0; // total across all fish
+    // 1.2. Weighted stake for "global minted" (everyone, not just the user).
+    // The user will select how many they personally want to buy (qAngel, qCod, etc.).
+    // Then we do Weighted Stake ratio => user portion of each year's pool.
 
     // Phase2 default
     let phase2StartYear = 5; 
 
-    // -----------------------
-    // 2. CREATE THE CARDS
-    // -----------------------
+    // We'll track if the user created a collection
+    let collectionCreated = false;
+
+    // Track the user’s total cost
+    let userInvestment = 0;
+
+    // Grab references to key DOM elements
+    const collectionContainer = document.getElementById('cert-collection');
+    const purchaseButton = document.getElementById('purchase-button');
+    const globalLicenseCounter = document.querySelector('#global-counter .counter-value');
+
+    const userCollectionDiv = document.getElementById('user-collection');
+    const tokenPriceContainer = document.getElementById('token-price-container');
+    const financialProjectionsContainer = document.getElementById('financial-projections-container');
+    const graphContainer = document.getElementById('graph-container');
+    const financialProjections = document.getElementById('financial-projections');
+
+    // The currently selected token price
+    let selectedTokenPrice = parseFloat(document.querySelector('input[name="token-price"]:checked')?.value || '0.025');
+
+    // 1.3. We’ll build the UI for each fish card:
     function createCertCards() {
         certData.forEach(cert => {
             const card = document.createElement('div');
             card.classList.add('cert-card');
             card.id = cert.id;
 
-            // Create a tooltip icon next to daily harvest rate (formerly harvestEfficiency)
-            // We’ll also rename “Harvest Efficiency” to “Daily Harvest Rate” for clarity
-            // Also adding a '?' icon next to Price Step example
             card.innerHTML = `
                 <div class="cert-inner">
                     <!-- FRONT -->
                     <div class="cert-front">
                         <div class="cert-image-box">
                             <div class="cert-image">
-                                <img src="${cert.imageSrc}" alt="${cert.altText}" 
-                                     width="200" height="200" loading="lazy">
+                                <img src="${cert.imageSrc}" alt="${cert.altText}" width="200" height="200" loading="lazy">
                             </div>
                         </div>
                         <div class="cert-text-box">
                             <h2>${cert.name}</h2>
                             <div class="cert-details">
-                                <p><span class="label">Total CERTs:</span>
+                                <p><span class="label">Max CERTs:</span>
                                    <span class="value">${cert.totalCerts.toLocaleString()}</span>
                                 </p>
-                                <p>
-                                  <span class="label">
-                                    Daily Harvest Rate
-                                    <span class="info-icon" data-tooltip="Your daily harvest % of fish tokens. Higher means more tokens per day.">?</span>
-                                  </span>
-                                  <span class="value">${cert.harvestEfficiency}</span>
+                                <!-- We might show minted% in a separate UI,
+                                     but let's just display total for now -->
+                                <p><span class="label">Weighted Factor:</span>
+                                   <span class="value">${cert.weightingFactor.toFixed(2)}</span>
                                 </p>
-                                <p>
-                                  <span class="label">
-                                    Price Step
-                                    <span class="info-icon" data-tooltip="Price increases by ${cert.priceStep} each time 100 units are sold.">?</span>
-                                  </span>
-                                  <span class="value">${cert.priceStep}</span>
-                                </p>
-                                <p><span class="label">Starting Price:</span>
-                                   <span class="value">${cert.startingPriceDisplay}</span>
+                                <p><span class="label">Phase 2 Multiplier:</span>
+                                   <span class="value">${cert.phase2Multiplier}x</span>
                                 </p>
                             </div>
                         </div>
-                        <button class="purchase-button" 
-                                aria-label="View ${cert.name} details" 
-                                role="button">
-                          VIEW DETAILS
+                        <button class="purchase-button" aria-label="View ${cert.name} details" role="button">
+                            VIEW DETAILS
                         </button>
                     </div>
 
@@ -174,25 +142,21 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="cert-text-box">
                             <h2>${cert.name} Details</h2>
                             <div class="cert-details">
-                                <p><span class="label">Available CERTs:</span>
-                                   <span class="value cert-remaining">${cert.totalCerts.toLocaleString()}</span>
+                                <p><span class="label">Global Sold (%):</span>
+                                   <span class="value global-sold">${globalPercentMinted[cert.id]}%</span>
                                 </p>
-                                <p><span class="label">Phase 2 Multiplier:</span>
-                                   <span class="value">${cert.phase2Multiplier}x</span>
+                                <p><span class="label">User CERTs:</span>
+                                   <span class="value user-qty">0</span>
                                 </p>
-                                <p><span class="label">Min Harvest/Day:</span>
-                                   <span class="value min-harvest-value">${cert.minHarvestPerDayPerCert.toFixed(2)}</span>
-                                </p>
-                                <p><span class="label">Total Cost:</span>
+                                <p><span class="label">Your Investment:</span>
                                    <span class="value total-cost-value">$0</span>
                                 </p>
                             </div>
                         </div>
 
-                        <!-- ROI area: daily USD & break-even -->
+                        <!-- ROI area: daily USD & break-even (just placeholders for now) -->
                         <div class="roi-estimate" style="margin-top:10px; font-size:0.9em; color:#00ffff;">
-                            <!-- We dynamically fill these in updateCounters / updateCardROI -->
-                            <p><strong>Est. Daily Income:</strong> <span class="daily-income">$0</span></p>
+                            <p><strong>Est. Year 1 Tokens:</strong> <span class="year1-tokens">--</span></p>
                             <p><strong>Break-even:</strong> <span class="break-even">-- days</span></p>
                         </div>
 
@@ -219,11 +183,470 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     createCertCards();
-
-    // Grab references to all newly created cards
     const certCards = document.querySelectorAll('.cert-card');
 
-    // If you want tooltip functionality for '.info-icon', here’s a quick approach:
+    // 1.4. We might also have a UI for global minted percentages. 
+    // This code snippet assumes you have sliders or inputs somewhere 
+    // that call `updateGlobalMinted(fishId, newPercent)`.
+
+    function updateGlobalMinted(fishId, newPercent) {
+        globalPercentMinted[fishId] = newPercent;
+        // Also re-render the card backside text 
+        const card = document.getElementById(fishId);
+        if (card) {
+            const globalSoldEl = card.querySelector('.global-sold');
+            if (globalSoldEl) {
+                globalSoldEl.textContent = newPercent + '%';
+            }
+        }
+        if (collectionCreated) updateCalculations();
+    }
+
+    /**************************************************************
+     *    2. YEARLY POOL & Weighted Stake
+     **************************************************************/
+
+    // 2.1. Build array of halving distribution 
+    // yearPool[1] = 2.745e9, yearPool[2] = 1.3725e9, ...
+    function computeYearlyPool() {
+        const yearlyPool = [];
+        let halfOfTotal = totalStakerPool / 2; // Year 1 is half => 2.745e9
+        for (let y = 1; y <= 10; y++) {
+            if (y === 1) {
+                yearlyPool[y] = halfOfTotal;
+            } else {
+                halfOfTotal = halfOfTotal / 2;
+                yearlyPool[y] = halfOfTotal;
+            }
+        }
+        return yearlyPool;
+    }
+
+    function getGlobalMintedCount(fishId) {
+        const cd = certData.find(c => c.id === fishId);
+        const percent = globalPercentMinted[fishId] / 100;
+        return Math.floor(cd.totalCerts * percent);
+    }
+
+    // Weighted stake in year Y (factoring phase2 multiplier)
+    function getWeightedStakeForYear(year) {
+        let userWeight = 0;
+        let globalWeight = 0;
+
+        certData.forEach(cert => {
+            const fishId = cert.id;
+            // Global minted
+            let gQty = getGlobalMintedCount(fishId);
+            // User minted
+            const card = document.getElementById(fishId);
+            const qtyInput = card.querySelector('.cert-counter input');
+            const userQty = parseInt(qtyInput.value) || 0;
+
+            // If year >= phase2 => multiply both user & global if you want 
+            // or only user if that’s your logic. 
+            let finalUserQty = userQty;
+            let finalGlobalQty = gQty;
+
+            if (year >= phase2StartYear) {
+                finalUserQty *= cert.phase2Multiplier;
+                // Some designs might multiply only user’s or also global minted.
+                finalGlobalQty *= cert.phase2Multiplier;
+            }
+
+            userWeight += finalUserQty * cert.weightingFactor;
+            globalWeight += finalGlobalQty * cert.weightingFactor;
+        });
+
+        return { userWeight, globalWeight };
+    }
+
+    // 2.2. Build a function to compute year-by-year user tokens
+    // and ROI data
+    function computeYearlyRewards() {
+        const pool = computeYearlyPool(); // e.g. array of 10
+        let cumTokens = 0;
+        let resultsPerYear = [];
+        const userCost = getUserTotalInvestment(); // total cost user spent
+
+        for (let y = 1; y <= 10; y++) {
+            const { userWeight, globalWeight } = getWeightedStakeForYear(y);
+            const yearPool = pool[y];
+
+            let userShareY = 0;
+            if (globalWeight > 0) {
+                userShareY = (userWeight / globalWeight) * yearPool;
+            }
+
+            cumTokens += userShareY;
+
+            // Value in USD
+            const yearValue = userShareY * selectedTokenPrice;
+            const cumValue = cumTokens * selectedTokenPrice;
+            // COR => (cumValue / userCost) * 100
+            const cor = userCost > 0 ? (cumValue / userCost) * 100 : 0;
+
+            resultsPerYear.push({
+                year: y,
+                userTokens: userShareY,
+                dailyTokens: userShareY / 365,
+                cumTokens,
+                yearValue,
+                cumValue,
+                cor
+            });
+        }
+        return resultsPerYear;
+    }
+
+    function getUserTotalInvestment() {
+        // sum up cost for each fish type (like your old code)
+        let total = 0;
+        certData.forEach(cert => {
+            const card = document.getElementById(cert.id);
+            const qtyInput = card.querySelector('.cert-counter input');
+            const quantity = parseInt(qtyInput.value) || 0;
+            // optionally, if you have a price step logic for purchase cost:
+            // For simplicity: price = ???
+
+            // example: let's do a simple approach: cost = quantity * some price 
+            // (But you'd presumably have your incremental price function.)
+            // Here, we skip it or do a direct approach if needed:
+
+            const costForThisFish = calculateTotalCostOfFish(cert, quantity);
+            total += costForThisFish;
+        });
+        return total;
+    }
+
+    // If you still want incremental pricing for each fish, define it:
+    function calculateTotalCostOfFish(cert, quantity) {
+        // e.g. your old code that increments by cert.incrementAmount each 100 sold
+        // or keep it simpler for demonstration:
+        let totalCost = 0;
+        let remaining = quantity;
+        let currentPrice = parseFloat(cert.startingPriceDisplay.replace(/[^0-9.]/g, '')) || 25;
+        let increment = cert.incrementAmount || 10;
+        let incrementInterval = cert.incrementInterval || 100;
+        let sold = 0;
+
+        while (remaining > 0) {
+            const nextIncrementAt = incrementInterval - (sold % incrementInterval);
+            const qtyAtThisPrice = Math.min(nextIncrementAt, remaining);
+            totalCost += qtyAtThisPrice * currentPrice;
+            sold += qtyAtThisPrice;
+            remaining -= qtyAtThisPrice;
+            if (remaining > 0) {
+                currentPrice += increment;
+            }
+        }
+        return totalCost;
+    }
+
+    /**************************************************************
+     *    3. Interactivity for Each Card
+     **************************************************************/
+    certCards.forEach(card => {
+        const fishId = card.id;
+        const viewButton = card.querySelector('.purchase-button');
+        const inputField = card.querySelector('.cert-counter input');
+        const minusButton = card.querySelector('.minus-button');
+        const plusButton = card.querySelector('.plus-button');
+
+        // Flip card
+        viewButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            card.classList.add('flipped');
+        });
+        card.addEventListener('click', (e) => {
+            if (card.classList.contains('flipped')) {
+                const clickedInsideCounter = e.target.closest('.cert-back .cert-counter') ||
+                                             e.target.closest('.counter-button') ||
+                                             e.target.closest('.cert-counter input') ||
+                                             e.target.closest('.roi-estimate');
+                if (!clickedInsideCounter) {
+                    card.classList.remove('flipped');
+                }
+            }
+        });
+
+        function updateQuantity(change) {
+            let currentVal = parseInt(inputField.value) || 0;
+            const certDef = certData.find(c => c.id === fishId);
+            const maxVal = certDef.totalCerts; // or maybe no max if partial minted?
+
+            let newVal = currentVal + change;
+            newVal = Math.max(0, Math.min(newVal, maxVal));
+            inputField.value = newVal;
+
+            // Update "User CERTs" display
+            const userQtyEl = card.querySelector('.user-qty');
+            if (userQtyEl) userQtyEl.textContent = newVal.toString();
+
+            // Recompute cost
+            const cost = calculateTotalCostOfFish(certDef, newVal);
+            const totalCostEl = card.querySelector('.total-cost-value');
+            if (totalCostEl) {
+                totalCostEl.textContent = '$' + cost.toLocaleString();
+            }
+
+            // Update global license counter (the sum of user picks)
+            const userTotalLic = getUserTotalLicenses();
+            globalLicenseCounter.textContent = userTotalLic.toLocaleString();
+
+            // We'll also store it to "userInvestment" if we want:
+            userInvestment = getUserTotalInvestment();
+
+            // If collection created, run big update
+            if (collectionCreated) {
+                updateCalculations();
+            }
+        }
+
+        plusButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            updateQuantity(1);
+        });
+        minusButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            updateQuantity(-1);
+        });
+        inputField.addEventListener('change', (e) => {
+            e.stopPropagation();
+            const val = parseInt(e.target.value) || 0;
+            updateQuantity(val - 0); // triggers the logic
+        });
+    });
+
+    function getUserTotalLicenses() {
+        let total = 0;
+        certCards.forEach(card => {
+            const qtyInput = card.querySelector('.cert-counter input');
+            total += parseInt(qtyInput.value) || 0;
+        });
+        return total;
+    }
+
+    /**************************************************************
+     *    4. Purchase Button => Creates Collection, Shows Sections
+     **************************************************************/
+    purchaseButton.addEventListener('click', () => {
+        collectionCreated = true;
+        updateUserCollection();
+        userCollectionDiv.style.display = 'block';
+        tokenPriceContainer.style.display = 'block';
+        financialProjectionsContainer.style.display = 'block';
+        graphContainer.style.display = 'block';
+
+        // updateCalculations => builds chart & table
+        updateCalculations();
+    });
+
+    function updateUserCollection() {
+        let html = '<h2>Your Collection</h2><div class="user-collection-container">';
+        certCards.forEach(card => {
+            const qtyInput = card.querySelector('.cert-counter input');
+            const quantity = parseInt(qtyInput.value) || 0;
+            if (quantity > 0) {
+                const fishName = card.querySelector('.cert-front h2').textContent;
+                const imgHtml = card.querySelector('.cert-image img').outerHTML;
+                html += `
+                  <div class="user-cert-card">
+                    ${imgHtml}
+                    <h3>${fishName}</h3>
+                    <p>Quantity: ${quantity}</p>
+                  </div>
+                `;
+            }
+        });
+        html += '</div>';
+        userCollectionDiv.innerHTML = html;
+        userCollectionDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    /**************************************************************
+     *    5. Token Price Radio + Phase 2 Buttons
+     **************************************************************/
+    const tokenPriceOptions = document.getElementsByName('token-price');
+    tokenPriceOptions.forEach(opt => {
+        opt.addEventListener('change', () => {
+            selectedTokenPrice = parseFloat(opt.value);
+            if (collectionCreated) updateCalculations();
+        });
+    });
+
+    const phase2Buttons = document.querySelectorAll('.phase2-button');
+    phase2Buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            phase2Buttons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            phase2StartYear = parseInt(btn.getAttribute('data-year'));
+            if (collectionCreated) updateCalculations();
+        });
+    });
+
+    // Graph toggle
+    const graphToggleButtons = document.querySelectorAll('.graph-toggle-button');
+    let chartInstance;
+    graphToggleButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            graphToggleButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            if (collectionCreated) updateCalculations();
+        });
+    });
+
+    /**************************************************************
+     *    6. The Main Calculation -> Harvesting or COR Graph
+     **************************************************************/
+    function updateCalculations() {
+        // Recompute user’s & global Weighted Stake etc.
+        const results = computeYearlyRewards(); // returns array of 10 years
+        // Build the chart & table from these results
+        buildChart(results);
+        buildProjectionTable(results);
+    }
+
+    function buildChart(yearlyData) {
+        const chartCanvas = document.getElementById('chartCanvas');
+        if (!chartCanvas) return;
+
+        const activeGraphType = document.querySelector('.graph-toggle-button.active')?.dataset.type || 'harvesting';
+
+        const labels = yearlyData.map(d => `Year ${d.year}`);
+        let dataset = null;
+        if (activeGraphType === 'harvesting') {
+            // show daily harvest or userTokens (yearly)
+            dataset = {
+                label: 'Yearly Tokens',
+                data: yearlyData.map(d => d.userTokens),
+                borderColor: '#0FF',
+                fill: false
+            };
+        } else {
+            // cor
+            dataset = {
+                label: 'COR (%)',
+                data: yearlyData.map(d => d.cor),
+                borderColor: '#FF3D3D',
+                fill: false
+            };
+        }
+
+        // If no tokens, hide
+        const anyTokens = yearlyData.some(d => d.userTokens > 0);
+        if (!anyTokens) {
+            chartCanvas.style.display = 'none';
+            financialProjections.innerHTML = '<p>Please select at least one CERT to view projections.</p>';
+            return;
+        } else {
+            chartCanvas.style.display = 'block';
+        }
+
+        if (chartInstance) chartInstance.destroy();
+        const ctx = chartCanvas.getContext('2d');
+        chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [ dataset ]
+            },
+            options: {
+                responsive: true,
+                elements: {
+                    line: { borderWidth: 3 },
+                    point: { radius: 5, hoverRadius: 7, backgroundColor: '#00e5ff' },
+                },
+                scales: {
+                    y: {
+                        type: (activeGraphType === 'cor') ? 'logarithmic' : 'linear',
+                        beginAtZero: false,
+                        ticks: {
+                            callback: function(value) {
+                                if (activeGraphType === 'cor') {
+                                    return value + '%';
+                                }
+                                return value;
+                            },
+                            color: '#00ffff'
+                        },
+                        grid: { color: 'rgba(0,255,255,0.2)' }
+                    },
+                    x: {
+                        grid: { color: 'rgba(0,255,255,0.2)' },
+                        ticks: { color: '#00ffff' }
+                    }
+                },
+                plugins: {
+                    legend: { labels: { color: '#00ffff' } },
+                    tooltip: {
+                        backgroundColor: '#001f29',
+                        titleColor: '#00e5ff',
+                        bodyColor: '#00ffff',
+                        borderColor: '#00e5ff',
+                        borderWidth: 1,
+                        callbacks: {
+                            label: function(ctx) {
+                                let lbl = ctx.dataset.label || '';
+                                if (activeGraphType === 'cor') {
+                                    return lbl + ': ' + ctx.parsed.y + '%';
+                                } else {
+                                    return lbl + ': ' + ctx.parsed.y.toFixed(2);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function buildProjectionTable(yearlyData) {
+        // Just like your old generateProjectionTable() but we now have a single user dataset
+        // because Weighted Stake lumps everything into one distribution
+        financialProjections.innerHTML = '';
+        const table = document.createElement('table');
+        table.classList.add('projection-table');
+
+        // We’ll do a simple 1-col approach for each year
+        // You can adapt to show fish by fish, but Weighted Stake lumps them together
+        const thead = document.createElement('thead');
+        thead.innerHTML = `
+            <tr>
+                <th>Year</th>
+                <th>User Tokens (Year)</th>
+                <th>Cumulative Tokens</th>
+                <th>Year Value (USD)</th>
+                <th>Cumulative Value (USD)</th>
+                <th>COR (%)</th>
+            </tr>
+        `;
+        table.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
+        yearlyData.forEach(d => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>Year ${d.year}</td>
+                <td>${d.userTokens.toFixed(2)}</td>
+                <td>${d.cumTokens.toFixed(2)}</td>
+                <td>$${d.yearValue.toFixed(2)}</td>
+                <td>$${d.cumValue.toFixed(2)}</td>
+                <td>${d.cor.toFixed(2)}%</td>
+            `;
+            tbody.appendChild(tr);
+        });
+        table.appendChild(tbody);
+
+        const tableDiv = document.createElement('div');
+        tableDiv.classList.add('table-container');
+        tableDiv.appendChild(table);
+
+        financialProjections.appendChild(tableDiv);
+    }
+
+    /**************************************************************
+     *   (Optional) If you want tooltip icons, here's a snippet:
+     **************************************************************/
     document.body.addEventListener('mouseover', (e) => {
         if (e.target.matches('.info-icon')) {
             const tip = e.target.getAttribute('data-tooltip');
@@ -244,581 +667,4 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // ----------------------------------------------------------
-    // 3. HELPER: Calculate incremental total cost
-    // ----------------------------------------------------------
-    function calculateTotalCost(quantity, startingPrice, incrementAmount, incrementInterval) {
-        let totalCost = 0;
-        let remainingQuantity = quantity;
-        let currentPrice = startingPrice;
-        let totalSold = 0;
-
-        while (remainingQuantity > 0) {
-            const nextIncrementAt = incrementInterval - (totalSold % incrementInterval);
-            const quantityAtCurrentPrice = Math.min(remainingQuantity, nextIncrementAt);
-
-            totalCost += quantityAtCurrentPrice * currentPrice;
-            remainingQuantity -= quantityAtCurrentPrice;
-            totalSold += quantityAtCurrentPrice;
-
-            if (remainingQuantity > 0) {
-                currentPrice += incrementAmount;
-            }
-        }
-        return totalCost;
-    }
-
-    // ----------------------------------------------------------
-    // 4. CARD INTERACTIVITY: Flip, plus/minus, update counters
-    // ----------------------------------------------------------
-    const cardTotalLicenses = {};
-    certData.forEach(cert => {
-        cardTotalLicenses[cert.id] = cert.totalCerts;
-    });
-
-    // We’ll track a “selectedTokenPrice” for daily income calculations
-    // This is updated by radio buttons in your UI.
-    let selectedTokenPrice = parseFloat(document.querySelector('input[name="token-price"]:checked')?.value || '0.025');
-
-    certCards.forEach(card => {
-        const viewButton = card.querySelector('.purchase-button');
-        const inputField = card.querySelector('.cert-counter input');
-        const minusButton = card.querySelector('.minus-button');
-        const plusButton = card.querySelector('.plus-button');
-        const cardId = card.id;
-        const totalCertsDisplay = card.querySelector('.cert-front .cert-details p:first-child .value');
-        const initialTotal = cardTotalLicenses[cardId];
-
-        // Flip to backside
-        viewButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            card.classList.add('flipped');
-        });
-
-        // Flip back if user clicks away from the counter area
-        card.addEventListener('click', (e) => {
-            if (card.classList.contains('flipped')) {
-                const clickedInsideCounter = e.target.closest('.cert-back .cert-counter') || 
-                                             e.target.closest('.counter-button') || 
-                                             e.target.closest('.cert-counter input') || 
-                                             e.target.closest('.roi-estimate');
-                if (!clickedInsideCounter) {
-                    card.classList.remove('flipped');
-                }
-            }
-        });
-
-        // Master function to handle quantity changes
-        function updateCounters(change) {
-            const currentValue = parseInt(inputField.value) || 0;
-            let newValue = currentValue + change;
-            newValue = Math.max(0, Math.min(newValue, initialTotal));
-            inputField.value = newValue;
-
-            // Recalculate total licenses owned (sum across all cards)
-            totalLicensesOwned = Array.from(certCards).reduce((sum, cCard) => {
-                const cInput = cCard.querySelector('.cert-counter input');
-                return sum + (parseInt(cInput ? cInput.value : 0) || 0);
-            }, 0);
-
-            // Update global counter
-            if (globalLicenseCounter) {
-                globalLicenseCounter.textContent = totalLicensesOwned.toLocaleString();
-            }
-
-            // Update available certs display (front + back)
-            const remainingCerts = initialTotal - newValue;
-            totalCertsDisplay.textContent = remainingCerts.toLocaleString();
-            const backCertsDisplay = card.querySelector('.cert-back .cert-remaining');
-            if (backCertsDisplay) {
-                backCertsDisplay.textContent = remainingCerts.toLocaleString();
-            }
-
-            // Update total cost on backside
-            const certDataItem = certData.find(cd => cd.id === cardId);
-            const totalCost = calculateTotalCost(newValue, certDataItem.startingPrice, certDataItem.incrementAmount, certDataItem.incrementInterval);
-            const totalCostDisplay = card.querySelector('.cert-back .total-cost-value');
-            if (totalCostDisplay) {
-                totalCostDisplay.textContent = '$' + totalCost.toLocaleString();
-            }
-
-            // Update min harvest/day (just as you had, but we can factor in newValue=0 => no harvest)
-            const minHarvestDisplay = card.querySelector('.cert-back .min-harvest-value');
-            const dailyIncomeDisplay = card.querySelector('.roi-estimate .daily-income');
-            const breakEvenDisplay = card.querySelector('.roi-estimate .break-even');
-
-            if (certDataItem && minHarvestDisplay && dailyIncomeDisplay && breakEvenDisplay) {
-                const dailyHarvestPerCert = certDataItem.minHarvestPerDayPerCert;
-                // If newValue > 0, total daily harvest is dailyHarvestPerCert * newValue
-                const totalDailyHarvest = dailyHarvestPerCert * newValue;
-                minHarvestDisplay.textContent = totalDailyHarvest.toFixed(2);
-
-                // Now let’s guess daily income in USD terms
-                const dailyUSD = totalDailyHarvest * selectedTokenPrice;
-                dailyIncomeDisplay.textContent = `$${dailyUSD.toFixed(2)}`;
-
-                // Approx break-even = totalCost / dailyUSD
-                let breakEvenDays = '--';
-                if (dailyUSD > 0) {
-                    breakEvenDays = (totalCost / dailyUSD).toFixed(1) + ' days';
-                }
-                breakEvenDisplay.textContent = breakEvenDays;
-            }
-
-            // Update floating summary bar
-            updateSummaryBar();
-
-            // If user has already created collection, we re-run updateCalculations
-            if (collectionCreated) {
-                updateCalculations();
-            }
-        }
-
-        if (plusButton) {
-            plusButton.addEventListener('click', (e) => {
-                e.stopPropagation();
-                updateCounters(1);
-            });
-        }
-        if (minusButton) {
-            minusButton.addEventListener('click', (e) => {
-                e.stopPropagation();
-                updateCounters(-1);
-            });
-        }
-        if (inputField) {
-            inputField.addEventListener('change', (e) => {
-                e.stopPropagation();
-                let val = parseInt(e.target.value) || 0;
-                val = Math.max(0, Math.min(val, initialTotal));
-                inputField.value = val;
-                updateCounters(0);
-            });
-        }
-    });
-
-    // ----------------------------------------------------------
-    // 5. FLOATING SUMMARY BAR (Optional)
-    // ----------------------------------------------------------
-    function updateSummaryBar() {
-        const summaryCerts = document.getElementById('summary-certs');
-        const summaryDaily = document.getElementById('summary-daily');
-        const summaryBEP = document.getElementById('summary-bep');
-        if (!summaryCerts || !summaryDaily || !summaryBEP) return; // If user hasn’t added these to HTML
-
-        // Recompute total cost & total daily harvest across all cards
-        let totalCostAll = 0;
-        let totalDailyHarvestAll = 0;
-
-        certCards.forEach(card => {
-            const cardId = card.id;
-            const quantity = parseInt(card.querySelector('.cert-counter input').value) || 0;
-            if (quantity > 0) {
-                const cData = certData.find(cd => cd.id === cardId);
-                const cCost = calculateTotalCost(quantity, cData.startingPrice, cData.incrementAmount, cData.incrementInterval);
-                totalCostAll += cCost;
-                totalDailyHarvestAll += cData.minHarvestPerDayPerCert * quantity;
-            }
-        });
-
-        summaryCerts.textContent = totalLicensesOwned.toString();
-
-        // If we’re using selectedTokenPrice to convert daily harvest into daily USD
-        const dailyUSD = totalDailyHarvestAll * selectedTokenPrice;
-        summaryDaily.textContent = `$${dailyUSD.toFixed(2)}`;
-
-        // Break-even
-        let beDays = '--';
-        if (dailyUSD > 0) {
-            beDays = (totalCostAll / dailyUSD).toFixed(1) + ' days';
-        }
-        summaryBEP.textContent = beDays;
-    }
-
-    // ----------------------------------------------------------
-    // 6. PHASE 2, PURCHASE BUTTONS, CHART, CALCULATIONS
-    // ----------------------------------------------------------
-    const phase2Buttons = document.querySelectorAll('.phase2-button');
-    phase2Buttons.forEach(button => {
-        button.addEventListener('click', () => {
-            phase2Buttons.forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-            phase2StartYear = parseInt(button.getAttribute('data-year'));
-            updateCalculations();
-        });
-    });
-
-    // The “Create Collection” or “Purchase” button
-    purchaseButton.addEventListener('click', () => {
-        collectionCreated = true; 
-        updateUserCollection();
-        // Show relevant sections
-        if (userCollectionDiv) userCollectionDiv.style.display = 'block';
-        if (tokenPriceContainer) tokenPriceContainer.style.display = 'block';
-        if (financialProjectionsContainer) financialProjectionsContainer.style.display = 'block';
-        if (graphContainer) graphContainer.style.display = 'block';
-
-        updateCalculations();
-    });
-
-    function recalcAllCards() {
-        certCards.forEach(card => {
-            const inputField = card.querySelector('.cert-counter input');
-            const quantity = parseInt(inputField.value) || 0;
-            
-            const cardId = card.id;
-            const dataItem = certData.find(d => d.id === cardId);
-            const totalCost = calculateTotalCost(quantity, dataItem.startingPrice, dataItem.incrementAmount, dataItem.incrementInterval);
-
-            const dailyHarvestPerCert = dataItem.minHarvestPerDayPerCert;
-            const totalDailyHarvest = dailyHarvestPerCert * quantity;
-
-            const dailyIncomeEl = card.querySelector('.roi-estimate .daily-income');
-            const breakEvenEl = card.querySelector('.roi-estimate .break-even');
-            if (dailyIncomeEl && breakEvenEl) {
-                const dailyUSD = totalDailyHarvest * selectedTokenPrice;
-                dailyIncomeEl.textContent = `$${dailyUSD.toFixed(2)}`;
-
-                let breakEvenDays = '--';
-                if (dailyUSD > 0) {
-                    breakEvenDays = (totalCost / dailyUSD).toFixed(1) + ' days';
-                }
-                breakEvenEl.textContent = breakEvenDays;
-            }
-        });
-    }
-
-    // Monitor token price radio buttons
-    const tokenPriceOptions = document.getElementsByName('token-price');
-    tokenPriceOptions.forEach(option => {
-        option.addEventListener('change', () => {
-            selectedTokenPrice = parseFloat(option.value);
-            recalcAllCards();
-            updateSummaryBar();
-            if (collectionCreated) {
-                updateCalculations();
-            }
-        });
-    });
-
-    // Graph toggle logic (existing)
-    const graphToggleButtons = document.querySelectorAll('.graph-toggle-button');
-    graphToggleButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            graphToggleButtons.forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-            updateCalculations();
-        });
-    });
-
-    // Now let’s keep your existing chart logic
-    let chartInstance;
-
-    function updateCalculations() {
-        if (!collectionCreated) return; // only run if user has created a collection
-
-        const graphType = document.querySelector('.graph-toggle-button.active')?.dataset.type || 'cor';
-
-        // Build the user selections
-        const usersSelections = {};
-        const totalInvestments = {};
-        certCards.forEach(card => {
-            const cardId = card.id;
-            const quantity = parseInt(card.querySelector('.cert-counter input').value) || 0;
-            usersSelections[cardId] = quantity;
-            if (quantity > 0) {
-                const cDataItem = certData.find(cd => cd.id === cardId);
-                const tCost = calculateTotalCost(quantity, cDataItem.startingPrice, cDataItem.incrementAmount, cDataItem.incrementInterval);
-                totalInvestments[cardId] = tCost;
-            }
-        });
-
-        const labels = Array.from({ length: 10 }, (_, i) => `Year ${i + 1}`);
-        const datasets = [];
-        const projectionData = {};
-
-        for (const certId in usersSelections) {
-            const qty = usersSelections[certId];
-            if (qty > 0) {
-                const cDataItem = certData.find(c => c.id === certId);
-                const dailyRate = cDataItem.minHarvestPerDayPerCert * qty;
-                const yearlyRates = calculateMiningRates(dailyRate, phase2StartYear, cDataItem.phase2Multiplier);
-
-                // cost
-                const cost = totalInvestments[certId];
-                const dailyValue = dailyRate * selectedTokenPrice;
-                const monthlyValue = dailyValue * 30;
-                const yearlyValue = dailyValue * 365;
-
-                // cumulative earnings
-                let cumEarnings = 0;
-                const cumEarningsY = {};
-                for (let year = 1; year <= 10; year++) {
-                    const rate = yearlyRates[year - 1];
-                    const yEarnings = rate * 365 * selectedTokenPrice;
-                    cumEarnings += yEarnings;
-                    if ([1, 3, 5, 10].includes(year)) {
-                        cumEarningsY[year] = cumEarnings;
-                    }
-                }
-
-                const corY1 = (cumEarningsY[1] / cost) * 100 || 0;
-                const corY3 = (cumEarningsY[3] / cost) * 100 || 0;
-                const corY5 = (cumEarningsY[5] / cost) * 100 || 0;
-                const corY10 = (cumEarningsY[10] / cost) * 100 || 0;
-
-                projectionData[cDataItem.name] = {
-                    dailyValue: dailyValue,
-                    monthlyValue: monthlyValue,
-                    yearlyValue: yearlyValue,
-                    corY1, corY3, corY5, corY10,
-                    investment: cost,
-                };
-
-                // Build dataset
-                datasets.push({
-                    label: cDataItem.name,
-                    data: (graphType === 'cor') 
-                        ? calculateCOR(cost, yearlyRates, selectedTokenPrice) 
-                        : yearlyRates,
-                    borderColor: cDataItem.certColor,
-                    fill: false,
-                    stepped: true,
-                });
-            }
-        }
-
-        // If no datasets, hide the chart
-        if (datasets.length === 0) {
-            document.getElementById('chartCanvas').style.display = 'none';
-            financialProjections.innerHTML = '<p>Please select at least one CERT to view projections.</p>';
-            return;
-        } else {
-            document.getElementById('chartCanvas').style.display = 'block';
-        }
-
-        generateProjectionTable(projectionData);
-
-        if (chartInstance) {
-            chartInstance.destroy();
-        }
-
-        const ctx = document.getElementById('chartCanvas').getContext('2d');
-        chartInstance = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: datasets,
-            },
-            options: {
-                responsive: true,
-                layout: { padding: { left: 20 } },
-                elements: {
-                    line: { borderWidth: 3, tension: 0.4 },
-                    point: { radius: 5, hoverRadius: 7, backgroundColor: '#00e5ff' },
-                },
-                scales: {
-                    x: {
-                        grid: { color: 'rgba(0, 255, 255, 0.2)' },
-                        ticks: {
-                            color: '#00ffff',
-                            font: { family: 'Orbitron', size: 14 },
-                        },
-                    },
-                    y: {
-                        type: graphType === 'cor' ? 'logarithmic' : 'linear',
-                        grid: { color: 'rgba(0, 255, 255, 0.2)' },
-                        ticks: {
-                            color: '#00ffff',
-                            font: { family: 'Orbitron', size: 14 },
-                            padding: 10,
-                            callback: function(value) {
-                                return value + (graphType === 'cor' ? '%' : '');
-                            }
-                        },
-                    },
-                },
-                plugins: {
-                    legend: {
-                        labels: {
-                            color: '#00ffff',
-                            font: { family: 'Orbitron', size: 14, weight: 'bold' },
-                            padding: 25,
-                        },
-                    },
-                    tooltip: {
-                        backgroundColor: '#001f29',
-                        titleColor: '#00e5ff',
-                        titleFont: { family: 'Orbitron', size: 16, weight: 'bold' },
-                        bodyColor: '#00ffff',
-                        bodyFont: { family: 'Orbitron', size: 14 },
-                        borderColor: '#00e5ff',
-                        borderWidth: 1,
-                        padding: 10,
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (graphType === 'cor') {
-                                    label += ': ' + context.parsed.y + '%';
-                                } else {
-                                    label += ': ' + context.parsed.y.toFixed(2);
-                                }
-                                return label;
-                            }
-                        }
-                    },
-                },
-            },
-        });
-    }
-
-    function calculateMiningRates(initialRate, phase2Start, multiplier) {
-        const rates = [];
-        for (let year = 1; year <= 10; year++) {
-            let rate = initialRate * Math.pow(0.5, year - 1);
-            if (year >= phase2Start) {
-                rate *= multiplier;
-            }
-            rates.push(Number(rate.toFixed(2)));
-        }
-        return rates;
-    }
-
-    function calculateCOR(investment, yearlyRates, tokenPrice) {
-        const corRates = [];
-        let cumEarnings = 0;
-        for (let year = 1; year <= yearlyRates.length; year++) {
-            const dailyRate = yearlyRates[year - 1];
-            const yEarnings = dailyRate * 365 * tokenPrice;
-            cumEarnings += yEarnings;
-            const cor = (cumEarnings / investment) * 100;
-            corRates.push(Number(cor.toFixed(2)));
-        }
-        return corRates;
-    }
-
-    function generateProjectionTable(projectionData) {
-        financialProjections.innerHTML = '';
-        const table = document.createElement('table');
-        table.classList.add('projection-table');
-
-        // Create thead and tbody
-        const thead = document.createElement('thead');
-        const tbody = document.createElement('tbody');
-        
-        // Header row
-        const headerRow = document.createElement('tr');
-        const firstHeaderCell = document.createElement('th');
-        firstHeaderCell.textContent = '';
-        headerRow.appendChild(firstHeaderCell);
-
-        for (const certName in projectionData) {
-            const th = document.createElement('th');
-            th.textContent = certName;
-            headerRow.appendChild(th);
-        }
-        thead.appendChild(headerRow);
-        table.appendChild(thead);
-
-        // Define tooltips for each row
-        const tooltips = {
-            investment: 'Total cost of CERTs purchased',
-            dailyValue: 'Estimated daily earnings based on current token price',
-            monthlyValue: 'Estimated monthly earnings (daily × 30)',
-            yearlyValue: 'Estimated yearly earnings (daily × 365)',
-            corY1: 'Cumulative % Return after Year 1',
-            corY3: 'Cumulative % Return after Year 3',
-            corY5: 'Cumulative % Return after Year 5',
-            corY10: 'Cumulative % Return after Year 10'
-        };
-
-        // Rows
-        const rows = [
-            { label: 'CERTs Purchased', key: 'investment', format: (v) => `$${v.toLocaleString()}` },
-            { label: 'Daily Value', key: 'dailyValue', format: (v) => `$${v.toFixed(2)}` },
-            { label: 'Monthly Value', key: 'monthlyValue', format: (v) => `$${v.toFixed(2)}` },
-            { label: 'Yearly Value', key: 'yearlyValue', format: (v) => `$${v.toFixed(2)}` },
-            { label: 'COR Y1', key: 'corY1', format: (v) => `${v.toFixed(2)}%` },
-            { label: 'COR Y3', key: 'corY3', format: (v) => `${v.toFixed(2)}%` },
-            { label: 'COR Y5', key: 'corY5', format: (v) => `${v.toFixed(2)}%` },
-            { label: 'COR Y10', key: 'corY10', format: (v) => `${v.toFixed(2)}%` },
-        ];
-
-        rows.forEach(row => {
-            const tr = document.createElement('tr');
-            const labelCell = document.createElement('td');
-            
-            // Add label with tooltip
-            const labelSpan = document.createElement('span');
-            labelSpan.textContent = row.label;
-            labelCell.appendChild(labelSpan);
-            
-            if (tooltips[row.key]) {
-                const infoIcon = document.createElement('span');
-                infoIcon.className = 'info-icon';
-                infoIcon.textContent = '?';
-                infoIcon.setAttribute('data-tooltip', tooltips[row.key]);
-                labelCell.appendChild(infoIcon);
-            }
-            
-            tr.appendChild(labelCell);
-
-            // Find max and min values for this row
-            const values = Object.values(projectionData).map(data => data[row.key]);
-            const maxVal = Math.max(...values);
-            const minVal = Math.min(...values);
-
-            // Add data cells
-            for (const certName in projectionData) {
-                const td = document.createElement('td');
-                const val = projectionData[certName][row.key];
-                td.textContent = row.format(val);
-                
-                // Highlight max/min values
-                if (val === maxVal && values.length > 1) {
-                    td.classList.add('highlight-max');
-                } else if (val === minVal && values.length > 1) {
-                    td.classList.add('highlight-min');
-                }
-                
-                tr.appendChild(td);
-            }
-            tbody.appendChild(tr);
-        });
-        
-        table.appendChild(tbody);
-
-        const tableContainer = document.createElement('div');
-        tableContainer.classList.add('table-container');
-        tableContainer.appendChild(table);
-
-        financialProjections.appendChild(tableContainer);
-    }
-
-    // ----------------------------------------------------------
-    // 7. USER COLLECTION
-    // ----------------------------------------------------------
-    function updateUserCollection() {
-        let collectionHTML = '<h2>Your Collection</h2><div class="user-collection-container">';
-
-        certCards.forEach(card => {
-            const quantity = parseInt(card.querySelector('.cert-counter input').value) || 0;
-            if (quantity > 0) {
-                const certName = card.querySelector('.cert-front h2').textContent;
-                const certImage = card.querySelector('.cert-image img').outerHTML;
-                collectionHTML += `
-                  <div class="user-cert-card">
-                    ${certImage}
-                    <h3>${certName}</h3>
-                    <p>Quantity: ${quantity}</p>
-                  </div>
-                `;
-            }
-        });
-
-        collectionHTML += '</div>';
-        userCollectionDiv.innerHTML = collectionHTML;
-        userCollectionDiv.style.display = 'block';
-        userCollectionDiv.scrollIntoView({ behavior: 'smooth' });
-    }
 });
