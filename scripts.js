@@ -93,34 +93,57 @@ document.addEventListener('DOMContentLoaded', () => {
         return Math.min(Math.floor(daysSinceStart / 365) + 1, 10);
     }
 
-    function calculateCurrentHarvestRate(cert, globalMinted) {
+    function calculateUserDailyHarvestForCert(cert) {
         const currentCycle = getCurrentCycle();
         const cyclePool = cyclePools[currentCycle];
         const dailyPool = cyclePool / 365;
 
-        // Calculate total weighted stake
-        let totalWeightedStake = 0;
+        // Calculate global weighted stake using actual numbers
+        let globalWeightedStake = 0;
         certData.forEach(c => {
-            const mintedAmount = (globalPercentMinted[c.id] / 100) * c.totalCerts;
-            totalWeightedStake += mintedAmount * c.weightingFactor;
+            // Global minted quantity is now the actual number of certs
+            let globalQty = getGlobalMintedCount(c.id);
+            
+            if (currentCycle >= phase2StartYear) {
+                globalQty *= c.phase2Multiplier;
+            }
+            globalWeightedStake += globalQty * c.weightingFactor;
         });
 
-        // Calculate harvest rate for this specific cert
-        if (totalWeightedStake > 0) {
-            const certWeight = cert.weightingFactor;
-            return (dailyPool / totalWeightedStake) * certWeight;
+        // Calculate user's actual quantity for this cert
+        let userQty = 0;
+        const cardElem = document.getElementById(cert.id);
+        if (cardElem) {
+            const qtyInput = cardElem.querySelector('.cert-counter input');
+            userQty = parseInt(qtyInput.value) || 0;
         }
-        return 0;
-    }  
+
+        // Apply phase 2 multiplier if applicable
+        if (currentCycle >= phase2StartYear) {
+            userQty *= cert.phase2Multiplier;
+        }
+        
+        // Calculate user's weighted stake
+        const userWeightedStake = userQty * cert.weightingFactor;
+
+        // Avoid division by zero
+        if (globalWeightedStake === 0) {
+            return 0;
+        }
+
+        // Calculate user's share of daily pool
+        const userShareFraction = userWeightedStake / globalWeightedStake;
+        return userShareFraction * dailyPool;
+    }
 
     // We'll store the "global minted percentage" for each fish,
     // e.g. if user sets 50% for Angel-FISH => 7500 minted globally.
     let globalPercentMinted = {
-        'angel-fish': 50,
-        'cod-fish': 50,
-        'tuna-fish': 50,
-        'sword-fish': 50,
-        'king-fish': 50
+        'angel-fish': 0,  // Start with 0 minted
+        'cod-fish': 0,    
+        'tuna-fish': 0,   
+        'sword-fish': 0,  
+        'king-fish': 0    
     };
 
     // 1.2. Weighted stake for "global minted" (everyone, not just the user).
@@ -192,8 +215,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="cert-text-box">
                             <h2>${cert.name} Details</h2>
                             <div class="cert-details">
-                                <p><span class="label">Global Sold (%):</span>
-                                   <span class="value global-sold">${globalPercentMinted[cert.id]}%</span>
+                                <p><span class="label">Global Sold:</span>
+                                   <span class="value global-sold">0/${cert.totalCerts.toLocaleString()}</span>
                                 </p>
                                 <p><span class="label">User CERTs:</span>
                                    <span class="value user-qty">0</span>
@@ -240,16 +263,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // This code snippet assumes you have sliders or inputs somewhere 
     // that call `updateGlobalMinted(fishId, newPercent)`.
 
-    function updateGlobalMinted(fishId, newPercent) {
-        globalPercentMinted[fishId] = newPercent;
-        // Also re-render the card backside text 
+    function updateGlobalMinted(fishId, newAmount) {
+        const cert = certData.find(c => c.id === fishId);
+        // Ensure we don't exceed total certs
+        newAmount = Math.min(newAmount, cert.totalCerts);
+        globalPercentMinted[fishId] = newAmount;
+        
+        // Update the display to show actual numbers out of total
         const card = document.getElementById(fishId);
         if (card) {
             const globalSoldEl = card.querySelector('.global-sold');
             if (globalSoldEl) {
-                globalSoldEl.textContent = newPercent + '%';
+                globalSoldEl.textContent = `${newAmount.toLocaleString()}/${cert.totalCerts.toLocaleString()}`;
             }
         }
+        recalcAllCards();
         if (collectionCreated) updateCalculations();
     }
 
@@ -275,8 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getGlobalMintedCount(fishId) {
         const cd = certData.find(c => c.id === fishId);
-        const percent = globalPercentMinted[fishId] / 100;
-        return Math.floor(cd.totalCerts * percent);
+        return globalPercentMinted[fishId]; // Return the actual number of minted certs, not a percentage calculation
     }
 
     // Weighted stake in year Y (factoring phase2 multiplier)
@@ -369,28 +396,40 @@ document.addEventListener('DOMContentLoaded', () => {
         return total;
     }
 
-    // If you still want incremental pricing for each fish, define it:
-    function calculateTotalCostOfFish(cert, quantity) {
-        // e.g. your old code that increments by cert.incrementAmount each 100 sold
-        // or keep it simpler for demonstration:
+    function getCurrentPriceForCert(cert, globalMinted) {
+        // Calculate how many price increments have occurred based on global minted amount
+        const incrementsOccurred = Math.floor(globalMinted / cert.incrementInterval);
+        return parseFloat(cert.startingPriceDisplay.replace(/[^0-9.]/g, '')) + (incrementsOccurred * cert.incrementAmount);
+    }
+
+    function calculateActualCostForQuantity(cert, quantity, globalMinted) {
         let totalCost = 0;
         let remaining = quantity;
-        let currentPrice = parseFloat(cert.startingPriceDisplay.replace(/[^0-9.]/g, '')) || 25;
-        let increment = cert.incrementAmount || 10;
-        let incrementInterval = cert.incrementInterval || 100;
-        let sold = 0;
-
+        let currentGlobalCount = globalMinted;
+        
         while (remaining > 0) {
-            const nextIncrementAt = incrementInterval - (sold % incrementInterval);
-            const qtyAtThisPrice = Math.min(nextIncrementAt, remaining);
-            totalCost += qtyAtThisPrice * currentPrice;
-            sold += qtyAtThisPrice;
-            remaining -= qtyAtThisPrice;
-            if (remaining > 0) {
-                currentPrice += increment;
-            }
+            // How many certs until next price increment
+            const certsUntilNextIncrement = cert.incrementInterval - (currentGlobalCount % cert.incrementInterval);
+            // How many we can buy at current price
+            const purchaseAtCurrentPrice = Math.min(certsUntilNextIncrement, remaining);
+            
+            // Get current price at this point
+            const currentPrice = getCurrentPriceForCert(cert, currentGlobalCount);
+            
+            // Add cost for this batch
+            totalCost += purchaseAtCurrentPrice * currentPrice;
+            
+            // Update remaining and global count
+            remaining -= purchaseAtCurrentPrice;
+            currentGlobalCount += purchaseAtCurrentPrice;
         }
+        
         return totalCost;
+    }
+
+    function calculateTotalCostOfFish(cert, quantity) {
+        const globalMinted = getGlobalMintedCount(cert.id);
+        return calculateActualCostForQuantity(cert, quantity, globalMinted);
     }
 
     /**************************************************************
@@ -423,7 +462,7 @@ document.addEventListener('DOMContentLoaded', () => {
         function updateQuantity(change) {
             let currentVal = parseInt(inputField.value) || 0;
             const certDef = certData.find(c => c.id === fishId);
-            const maxVal = certDef.totalCerts; // or maybe no max if partial minted?
+            const maxVal = certDef.totalCerts;
 
             let newVal = currentVal + change;
             newVal = Math.max(0, Math.min(newVal, maxVal));
@@ -433,28 +472,28 @@ document.addEventListener('DOMContentLoaded', () => {
             const userQtyEl = card.querySelector('.user-qty');
             if (userQtyEl) userQtyEl.textContent = newVal.toString();
 
-            // Recompute cost
-            const cost = calculateTotalCostOfFish(certDef, newVal);
+            // Get actual cost based on incremental pricing
+            const globalMinted = getGlobalMintedCount(certDef.id);
+            const actualCost = calculateActualCostForQuantity(certDef, newVal, globalMinted);
+            
             const totalCostEl = card.querySelector('.total-cost-value');
             if (totalCostEl) {
-                totalCostEl.textContent = '$' + cost.toLocaleString();
+                totalCostEl.textContent = '$' + actualCost.toLocaleString();
             }
 
-            // Update harvest rate
-            const harvestRate = calculateCurrentHarvestRate(certDef, globalPercentMinted[fishId]);
+            // Recompute harvest rate
+            const dailyHarvestRate = calculateUserDailyHarvestForCert(certDef);
             const harvestEl = card.querySelector('.current-harvest');
             if (harvestEl) {
-                harvestEl.textContent = harvestRate.toFixed(2) + ' tokens/day';
+                harvestEl.textContent = dailyHarvestRate.toFixed(2) + ' tokens/day';
             }
 
-            // Update global license counter (the sum of user picks)
+            // Update global license counter
             const userTotalLic = getUserTotalLicenses();
             globalLicenseCounter.textContent = userTotalLic.toLocaleString();
 
-            // We'll also store it to "userInvestment" if we want:
             userInvestment = getUserTotalInvestment();
 
-            // If collection created, run big update
             if (collectionCreated) {
                 updateCalculations();
             }
@@ -528,7 +567,10 @@ document.addEventListener('DOMContentLoaded', () => {
     tokenPriceOptions.forEach(opt => {
         opt.addEventListener('change', () => {
             selectedTokenPrice = parseFloat(opt.value);
-            if (collectionCreated) updateCalculations();
+            recalcAllCards(); // Recalc harvest rates and related values
+            if (collectionCreated) {
+                updateCalculations();
+            }
         });
     });
 
@@ -724,5 +766,58 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+
+    function recalcAllCards() {
+        certCards.forEach(card => {
+            const fishId = card.id;
+            const certDef = certData.find(c => c.id === fishId);
+            const globalMinted = getGlobalMintedCount(fishId);
+            
+            // Get user's quantity
+            const inputField = card.querySelector('.cert-counter input');
+            const userQty = parseInt(inputField.value) || 0;
+            
+            // Calculate actual cost based on incremental pricing
+            const actualCost = calculateActualCostForQuantity(certDef, userQty, globalMinted);
+            
+            // Update total cost display
+            const totalCostEl = card.querySelector('.total-cost-value');
+            if (totalCostEl) {
+                totalCostEl.textContent = '$' + actualCost.toLocaleString();
+            }
+            
+            // Calculate and update harvest rate
+            const dailyHarvestRate = calculateUserDailyHarvestForCert(certDef);
+            const harvestEl = card.querySelector('.current-harvest');
+            if (harvestEl) {
+                harvestEl.textContent = dailyHarvestRate.toFixed(2) + ' tokens/day';
+            }
+
+            // Update Year 1 tokens estimate
+            const year1TokensEl = card.querySelector('.year1-tokens');
+            if (year1TokensEl) {
+                const yearlyTokens = dailyHarvestRate * 365;
+                year1TokensEl.textContent = yearlyTokens.toFixed(2) + ' tokens';
+            }
+
+            // Update break-even using actual cost
+            const breakEvenEl = card.querySelector('.break-even');
+            if (breakEvenEl) {
+                const dailyUSD = dailyHarvestRate * selectedTokenPrice;
+                let breakEvenDays = '--';
+                if (dailyUSD > 0) {
+                    breakEvenDays = Math.ceil(actualCost / dailyUSD);
+                }
+                breakEvenEl.textContent = breakEvenDays + ' days';
+            }
+
+            // Update current price display if it exists
+            const currentPriceEl = card.querySelector('.current-price');
+            if (currentPriceEl) {
+                const currentPrice = getCurrentPriceForCert(certDef, globalMinted);
+                currentPriceEl.textContent = '$' + currentPrice.toLocaleString();
+            }
+        });
+    }
 
 });
