@@ -1,0 +1,189 @@
+1. Major Issue: The change Event Increments Instead of Sets
+In your scripts.js, each card’s quantity field is wired like this:
+
+js
+Copy
+inputField.addEventListener('change', (e) => {
+    e.stopPropagation();
+    const val = parseInt(e.target.value) || 0;
+    updateQuantity(val - 0); // triggers the logic
+});
+Inside updateQuantity(change), you treat the function parameter as a delta:
+
+js
+Copy
+function updateQuantity(change) {
+    let currentVal = parseInt(inputField.value) || 0;
+    // ...
+    let newVal = currentVal + change;
+    // ...
+}
+That means if a user types in “10,” your code calls updateQuantity(10), which ends up doing newVal = currentVal + 10. If currentVal was 4, then the new quantity incorrectly becomes 14 rather than simply 10.
+
+How to fix
+You want the typed input to represent an absolute new value—not a delta. The simplest fix is to either:
+
+Make a separate function for setting an absolute quantity, or
+Change updateQuantity so that it can detect an absolute assignment vs. a plus/minus increment.
+Example Fix #1: Set Absolute Value Directly
+One quick approach is to rename updateQuantity(change) to something like setQuantity(newValue) for the change event. Then your plus/minus buttons can remain using an increment function.
+
+js
+Copy
+// 1) Rename or add a dedicated function for setting absolute quantity
+function setCardQuantity(card, absoluteValue) {
+    // bounds check
+    const certDef = certData.find(c => c.id === card.id);
+    const maxVal = certDef.totalCerts;
+    const newVal = Math.max(0, Math.min(absoluteValue, maxVal));
+
+    // update the input field to reflect final value
+    const inputField = card.querySelector('.cert-counter input');
+    inputField.value = newVal;
+
+    // update "User CERTs" display
+    const userQtyEl = card.querySelector('.user-qty');
+    if (userQtyEl) userQtyEl.textContent = newVal.toString();
+
+    // recalc cost, harvest, break-even, etc.
+    recalcCardStats(card, newVal);
+}
+
+// 2) For typed changes, call setCardQuantity(...) with the typed absolute value
+inputField.addEventListener('change', (e) => {
+    e.stopPropagation();
+    const val = parseInt(e.target.value) || 0;
+    setCardQuantity(card, val);
+});
+
+// 3) For +/- buttons, do increments:
+function updateQuantity(card, delta) {
+    const inputField = card.querySelector('.cert-counter input');
+    let currentVal = parseInt(inputField.value) || 0;
+    setCardQuantity(card, currentVal + delta);
+}
+Example Fix #2: Adjust the Existing updateQuantity to Accept Both a Delta and Absolute
+If you prefer to keep only one function, you can pass something like { absolute: 10 } vs. { delta: 1 }. But the simplest is usually to have one function for absolute sets and one function for increments.
+
+Either way, the key is ensuring that what the user types into the input is the final absolute quantity, not an additional increment.
+
+2. Minor Observations / Potential Tweaks
+role="button" on a <button>
+
+You have <button class="purchase-button" aria-label="View ${cert.name} details" role="button">VIEW DETAILS</button>. Since it’s already a real <button>, you don’t need role="button". It’s harmless, but redundant.
+Asset Paths
+
+Paths like imageSrc: 'assets/icon--angel-fish-colors--teal-cyan-with-deep-blue-.png' assume you have a folder named assets/ in the same location as your HTML base href="/". Just be sure your folder structure is correct.
+Start Date for getCurrentCycle
+
+The snippet uses const startDate = new Date('2024-01-01');. Make sure that’s truly your intended cutover date; otherwise your cycle logic may be off in the future.
+Long Strings in Comments
+
+The code is very thorough with comments; just be mindful of how big blocks of comments can sometimes bloat your script. You might want to move some explanation to a README if you keep it in production.
+Performance
+
+Each time you change a quantity, you call recalcAllCards(), which loops over all certs again. That’s fine for small data. If this scales to many items, you might consider a more targeted approach. For a handful of FISH cards, though, it’s perfectly acceptable.
+3. Corrected Key Snippet (Illustration)
+Below is an illustration of how you might tweak just the relevant part of the code to ensure the “typed” values become absolute, while leaving your plus/minus as increments. (You can adapt this concept to your code style.)
+
+js
+Copy
+// In your forEach(card => ...) where you attach event listeners:
+const inputField = card.querySelector('.cert-counter input');
+const minusButton = card.querySelector('.minus-button');
+const plusButton = card.querySelector('.plus-button');
+
+// + / - remains a delta
+plusButton.addEventListener('click', (e) => {
+    e.stopPropagation();
+    updateQuantity(card, 1); 
+});
+minusButton.addEventListener('click', (e) => {
+    e.stopPropagation();
+    updateQuantity(card, -1);
+});
+
+// For direct typing in the field: set absolute
+inputField.addEventListener('change', (e) => {
+    e.stopPropagation();
+    const typedVal = parseInt(e.target.value) || 0;
+    setCardQuantity(card, typedVal);
+});
+
+// updateQuantity now only handles delta
+function updateQuantity(card, delta) {
+    const input = card.querySelector('.cert-counter input');
+    const oldVal = parseInt(input.value) || 0;
+    const newVal = oldVal + delta;
+    setCardQuantity(card, newVal);
+}
+
+// setCardQuantity does the real math + UI updates
+function setCardQuantity(card, quantity) {
+    // bounds check
+    const certDef = certData.find(c => c.id === card.id);
+    const maxVal = certDef.totalCerts;
+    const finalVal = Math.max(0, Math.min(quantity, maxVal));
+
+    // update the input UI
+    const input = card.querySelector('.cert-counter input');
+    input.value = finalVal;
+
+    // update "User CERTs" display
+    const userQtyEl = card.querySelector('.user-qty');
+    if (userQtyEl) userQtyEl.textContent = finalVal.toString();
+
+    // recalc cost, harvest, break-even, etc.
+    const globalMinted = getGlobalMintedCount(certDef.id);
+    const actualCost = calculateActualCostForQuantity(certDef, finalVal, globalMinted);
+    const totalCostEl = card.querySelector('.total-cost-value');
+    if (totalCostEl) {
+        totalCostEl.textContent = '$' + actualCost.toLocaleString();
+    }
+
+    const dailyHarvestRate = calculateUserDailyHarvestForCert(certDef);
+    const harvestEl = card.querySelector('.current-harvest');
+    if (harvestEl) {
+        harvestEl.textContent = dailyHarvestRate.toFixed(2) + ' tokens/day';
+    }
+
+    // Year 1 tokens estimate
+    const year1TokensEl = card.querySelector('.year1-tokens');
+    if (year1TokensEl) {
+        const yearlyTokens = dailyHarvestRate * 365;
+        year1TokensEl.textContent = yearlyTokens.toFixed(2) + ' tokens';
+    }
+
+    // Break-even
+    const breakEvenEl = card.querySelector('.break-even');
+    if (breakEvenEl) {
+        const dailyUSD = dailyHarvestRate * selectedTokenPrice;
+        let breakEvenDays = '--';
+        if (dailyUSD > 0) {
+            breakEvenDays = Math.ceil(actualCost / dailyUSD);
+        }
+        breakEvenEl.textContent = breakEvenDays + ' days';
+    }
+
+    // Update global license counter 
+    const userTotalLic = getUserTotalLicenses();
+    globalLicenseCounter.textContent = userTotalLic.toLocaleString();
+
+    // If collection is already created, re-run your top-level projections
+    if (collectionCreated) {
+        updateCalculations();
+    }
+}
+That is the main adjustment needed to ensure manual typing sets a hard value, while your +/- buttons keep incrementing or decrementing. The rest of your code—conditional reveals, chart building, table updates, etc.—works nicely once the quantity is correct.
+
+Final Thoughts
+Everything else in your HTML, CSS, and JS looks broadly coherent. Your use of Chart.js, the incremental pricing logic, phase-2 multipliers, and the toggling/flipping UI is quite polished.
+The only true bug that causes incorrect behavior is the event handling for typed input values. Fixing that ensures your displayed “User CERTs,” “Your Investment,” and “ROI” reflect exactly what the user enters.
+If you do want to refine more, check the minor notes above, but none are show-stoppers.
+Once you fix the input handling, your “FISH CERTs Purchase Simulator” should work as intended!
+
+
+
+
+
+
