@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
         {
             id: 'angel-fish',
             name: 'Angel-FISH',
-            imageSrc: 'assets/ANGEL-FISH-NBG.jpg',
+            imageSrc: 'assets/icon--angel-fish-colors--teal-cyan-with-deep-blue-.png',
             altText: 'Angel-FISH Icon',
             totalCerts: 15000, // max possible
             weightingFactor: 0.25,
@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
         {
             id: 'cod-fish',
             name: 'Cod-FISH',
-            imageSrc: 'assets/COD-FISH-NBG.jpg',
+            imageSrc: 'assets/COD FISH CERT.png',
             altText: 'Cod-FISH Icon',
             totalCerts: 12500,
             weightingFactor: 0.50,
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
         {
             id: 'tuna-fish',
             name: 'Tuna-FISH',
-            imageSrc: 'assets/TUNA-FISH-BNG.jpg',
+            imageSrc: 'assets/icon--tuna-colors--teal-cyan-with-deep-blue-highli.png',
             altText: 'Tuna-FISH Icon',
             totalCerts: 10000,
             weightingFactor: 0.75,
@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
         {
             id: 'sword-fish',
             name: 'Sword-FISH',
-            imageSrc: 'assets/SWORD-FISH-NBG.jpg',
+            imageSrc: 'assets/SWORD FISH CERT.png',
             altText: 'Sword-FISH Icon',
             totalCerts: 7500,
             weightingFactor: 1.00,
@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
         {
             id: 'king-fish',
             name: 'King-FISH',
-            imageSrc: 'assets/KING-FISH-NBG.jpg',
+            imageSrc: 'assets/icon--kingfish-colors--teal-cyan-with-deep-blue-hi.png',
             altText: 'King-FISH Icon',
             totalCerts: 5000,
             weightingFactor: 1.25,
