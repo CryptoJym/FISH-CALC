@@ -71,12 +71,47 @@ document.addEventListener('DOMContentLoaded', () => {
         },
     ];
 
-    // 1.1. This is the total staker pool for 10 years: 5.49e9
-    // The distribution halved each year:
-    //   Year 1 = 2.745e9
-    //   Year 2 = 1.3725e9
-    //   ...
-    const totalStakerPool = 5.49e9;  
+    // Cycle pools for token distribution
+    const cyclePools = {
+        1: 2.745e9,    // Year 1
+        2: 1.3725e9,   // Year 2
+        3: 0.68625e9,  // Year 3
+        4: 0.343125e9, // Year 4
+        5: 0.1715625e9,// Year 5
+        6: 0.08578125e9,// Year 6
+        7: 0.042890625e9,// Year 7
+        8: 0.0214453125e9,// Year 8
+        9: 0.01072265625e9,// Year 9
+        10: 0.005361328125e9 // Year 10
+    };
+    const totalStakerPool = 5.49e9;
+
+    function getCurrentCycle() {
+        const now = new Date();
+        const startDate = new Date('2024-01-01'); // Replace with actual start date
+        const daysSinceStart = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
+        return Math.min(Math.floor(daysSinceStart / 365) + 1, 10);
+    }
+
+    function calculateCurrentHarvestRate(cert, globalMinted) {
+        const currentCycle = getCurrentCycle();
+        const cyclePool = cyclePools[currentCycle];
+        const dailyPool = cyclePool / 365;
+
+        // Calculate total weighted stake
+        let totalWeightedStake = 0;
+        certData.forEach(c => {
+            const mintedAmount = (globalPercentMinted[c.id] / 100) * c.totalCerts;
+            totalWeightedStake += mintedAmount * c.weightingFactor;
+        });
+
+        // Calculate harvest rate for this specific cert
+        if (totalWeightedStake > 0) {
+            const certWeight = cert.weightingFactor;
+            return (dailyPool / totalWeightedStake) * certWeight;
+        }
+        return 0;
+    }  
 
     // We'll store the "global minted percentage" for each fish,
     // e.g. if user sets 50% for Angel-FISH => 7500 minted globally.
@@ -169,8 +204,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                         </div>
 
-                        <!-- ROI area: daily USD & break-even (just placeholders for now) -->
+                        <!-- ROI area with harvest rate -->
                         <div class="roi-estimate" style="margin-top:10px; font-size:0.9em; color:#00ffff;">
+                            <p><strong>Current Harvest Rate:</strong> <span class="current-harvest">--</span></p>
                             <p><strong>Est. Year 1 Tokens:</strong> <span class="year1-tokens">--</span></p>
                             <p><strong>Break-even:</strong> <span class="break-even">-- days</span></p>
                         </div>
@@ -402,6 +438,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const totalCostEl = card.querySelector('.total-cost-value');
             if (totalCostEl) {
                 totalCostEl.textContent = '$' + cost.toLocaleString();
+            }
+
+            // Update harvest rate
+            const harvestRate = calculateCurrentHarvestRate(certDef, globalPercentMinted[fishId]);
+            const harvestEl = card.querySelector('.current-harvest');
+            if (harvestEl) {
+                harvestEl.textContent = harvestRate.toFixed(2) + ' tokens/day';
             }
 
             // Update global license counter (the sum of user picks)
