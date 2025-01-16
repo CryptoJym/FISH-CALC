@@ -462,7 +462,8 @@ document.addEventListener('DOMContentLoaded', () => {
         function setQuantity(newValue) {
             const certDef = certData.find(c => c.id === fishId);
             const maxVal = certDef.totalCerts;
-            newValue = Math.max(0, Math.min(newValue, maxVal));
+            // Ensure value is within bounds
+            newValue = Math.max(0, Math.min(parseInt(newValue) || 0, maxVal));
             inputField.value = newValue;
 
             // Update "User CERTs" display
@@ -511,8 +512,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         inputField.addEventListener('change', (e) => {
             e.stopPropagation();
-            const val = parseInt(e.target.value) || 0;
-            setQuantity(val);
+            const newValue = parseInt(e.target.value) || 0;
+            setQuantity(newValue); // Directly set the new value
         });
     });
 
