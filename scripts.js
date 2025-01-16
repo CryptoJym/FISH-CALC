@@ -459,22 +459,19 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        function updateQuantity(change) {
-            let currentVal = parseInt(inputField.value) || 0;
+        function setQuantity(newValue) {
             const certDef = certData.find(c => c.id === fishId);
             const maxVal = certDef.totalCerts;
-
-            let newVal = currentVal + change;
-            newVal = Math.max(0, Math.min(newVal, maxVal));
-            inputField.value = newVal;
+            newValue = Math.max(0, Math.min(newValue, maxVal));
+            inputField.value = newValue;
 
             // Update "User CERTs" display
             const userQtyEl = card.querySelector('.user-qty');
-            if (userQtyEl) userQtyEl.textContent = newVal.toString();
+            if (userQtyEl) userQtyEl.textContent = newValue.toString();
 
             // Get actual cost based on incremental pricing
             const globalMinted = getGlobalMintedCount(certDef.id);
-            const actualCost = calculateActualCostForQuantity(certDef, newVal, globalMinted);
+            const actualCost = calculateActualCostForQuantity(certDef, newValue, globalMinted);
             
             const totalCostEl = card.querySelector('.total-cost-value');
             if (totalCostEl) {
@@ -499,6 +496,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        function updateQuantity(delta) {
+            const currentVal = parseInt(inputField.value) || 0;
+            setQuantity(currentVal + delta);
+        }
+
         plusButton.addEventListener('click', (e) => {
             e.stopPropagation();
             updateQuantity(1);
@@ -510,7 +512,7 @@ document.addEventListener('DOMContentLoaded', () => {
         inputField.addEventListener('change', (e) => {
             e.stopPropagation();
             const val = parseInt(e.target.value) || 0;
-            updateQuantity(val - 0); // triggers the logic
+            setQuantity(val);
         });
     });
 
