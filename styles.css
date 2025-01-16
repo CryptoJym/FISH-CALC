@@ -7,6 +7,37 @@
     box-sizing: border-box;
 }
 
+
+    /* Global Minting Controls */
+    #global-minted-controls {
+        background: var(--card-background);
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+    }
+
+    .minted-control {
+        display: flex;
+        align-items: center;
+        margin: 10px 0;
+        gap: 10px;
+    }
+
+    .minted-control label {
+        min-width: 100px;
+    }
+
+    .minted-control input[type="range"] {
+        flex: 1;
+        accent-color: var(--primary-color);
+    }
+
+    .minted-control span {
+        min-width: 60px;
+        text-align: right;
+    }
+
 :root {
     --primary-color: #00FFFF; /* Bright Aqua */
     --secondary-color: #40E0D0; /* Bright Turquoise */
