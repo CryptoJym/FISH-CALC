@@ -16,37 +16,6 @@
 <body>
     <div class="container">
         <h1>FISH (CERT) Collection</h1>
-
-        <!-- Global Minting Controls -->
-        <div id="global-minted-controls">
-            <h2>Global Minted Percentage</h2>
-            <div class="minted-control">
-                <label>Angel-FISH: </label>
-                <input type="range" min="0" max="100" value="50" id="angel-global-range">
-                <span id="angel-val">50%</span>
-            </div>
-            <div class="minted-control">
-                <label>Cod-FISH: </label>
-                <input type="range" min="0" max="100" value="50" id="cod-global-range">
-                <span id="cod-val">50%</span>
-            </div>
-            <div class="minted-control">
-                <label>Tuna-FISH: </label>
-                <input type="range" min="0" max="100" value="50" id="tuna-global-range">
-                <span id="tuna-val">50%</span>
-            </div>
-            <div class="minted-control">
-                <label>Sword-FISH: </label>
-                <input type="range" min="0" max="100" value="50" id="sword-global-range">
-                <span id="sword-val">50%</span>
-            </div>
-            <div class="minted-control">
-                <label>King-FISH: </label>
-                <input type="range" min="0" max="100" value="50" id="king-global-range">
-                <span id="king-val">50%</span>
-            </div>
-        </div>
-
         <h2>Select Your FISH CERTs</h2>
         <div class="collection-container" id="cert-collection">
             <!-- Certification Cards will be dynamically generated here by scripts.js -->
@@ -64,6 +33,38 @@
                         <span class="counter-value">0</span>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GLOBAL MINTED CONTROLS -->
+    <div id="global-minted-controls">
+        <h2>Global Minted Percentage</h2>
+        <div class="slider-container">
+            <div class="slider-group">
+                <label>Angel-FISH:</label>
+                <input type="range" min="0" max="100" value="50" id="angel-fish-global-range" />
+                <span class="slider-value" id="angel-fish-val">50%</span>
+            </div>
+            <div class="slider-group">
+                <label>Cod-FISH:</label>
+                <input type="range" min="0" max="100" value="50" id="cod-fish-global-range" />
+                <span class="slider-value" id="cod-fish-val">50%</span>
+            </div>
+            <div class="slider-group">
+                <label>Tuna-FISH:</label>
+                <input type="range" min="0" max="100" value="50" id="tuna-fish-global-range" />
+                <span class="slider-value" id="tuna-fish-val">50%</span>
+            </div>
+            <div class="slider-group">
+                <label>Sword-FISH:</label>
+                <input type="range" min="0" max="100" value="50" id="sword-fish-global-range" />
+                <span class="slider-value" id="sword-fish-val">50%</span>
+            </div>
+            <div class="slider-group">
+                <label>King-FISH:</label>
+                <input type="range" min="0" max="100" value="50" id="king-fish-global-range" />
+                <span class="slider-value" id="king-fish-val">50%</span>
             </div>
         </div>
     </div>
