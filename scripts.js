@@ -98,17 +98,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const cyclePool = cyclePools[currentCycle];
         const dailyPool = cyclePool / 365;
 
-        // Calculate global weighted stake using actual numbers
-        let globalWeightedStake = 0;
+        // Calculate total global weighted stake with all multipliers
+        let totalWeightedStake = 0;
         certData.forEach(c => {
-            let globalQty = getGlobalMintedCount(c.id);
-            if (currentCycle >= phase2StartYear) {
-                globalQty *= c.phase2Multiplier;
-            }
-            globalWeightedStake += globalQty * c.weightingFactor;
+            const globalMinted = getGlobalMintedCount(c.id);
+            const weightedAmount = globalMinted * c.weightingFactor;
+            const multipliedAmount = currentCycle >= phase2StartYear ? weightedAmount * c.phase2Multiplier : weightedAmount;
+            totalWeightedStake += multipliedAmount;
         });
 
-        // Calculate user's actual quantity for this cert only
+        // Calculate user's stake for this specific cert with multipliers
         let userQty = 0;
         const cardElem = document.getElementById(cert.id);
         if (cardElem) {
@@ -116,24 +115,19 @@ document.addEventListener('DOMContentLoaded', () => {
             userQty = parseInt(qtyInput.value) || 0;
         }
 
-        // Apply phase 2 multiplier if applicable
-        if (currentCycle >= phase2StartYear) {
-            userQty *= cert.phase2Multiplier;
-        }
-        
-        // Calculate user's weighted stake for this specific cert
         const userWeightedStake = userQty * cert.weightingFactor;
+        const userMultipliedStake = currentCycle >= phase2StartYear ? userWeightedStake * cert.phase2Multiplier : userWeightedStake;
 
         // Avoid division by zero
-        if (globalWeightedStake === 0) {
+        if (totalWeightedStake === 0) {
             return 0;
         }
 
-        // Calculate user's share of daily pool for this specific cert
-        const userShareFraction = userWeightedStake / globalWeightedStake;
+        // Calculate user's share of daily pool with all factors considered
+        const userShareFraction = userMultipliedStake / totalWeightedStake;
         const dailyHarvest = userShareFraction * dailyPool;
 
-        return Math.max(0, dailyHarvest);
+        return dailyHarvest;
     }
 
     // We'll store the "global minted percentage" for each fish,
