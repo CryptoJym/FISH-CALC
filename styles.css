@@ -863,3 +863,9 @@ button:hover {
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     line-height: 1.4;
 }
+
+/* OPTIONAL: Disclaimers / More Info (example) */
+.container:last-of-type {
+    margin-top: 40px;
+    padding-bottom: 60px; /* Add space for floating bar */
+}
