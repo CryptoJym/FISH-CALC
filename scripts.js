@@ -101,16 +101,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // Calculate global weighted stake using actual numbers
         let globalWeightedStake = 0;
         certData.forEach(c => {
-            // Global minted quantity is now the actual number of certs
             let globalQty = getGlobalMintedCount(c.id);
-            
             if (currentCycle >= phase2StartYear) {
                 globalQty *= c.phase2Multiplier;
             }
             globalWeightedStake += globalQty * c.weightingFactor;
         });
 
-        // Calculate user's actual quantity for this cert
+        // Calculate user's actual quantity for this cert only
         let userQty = 0;
         const cardElem = document.getElementById(cert.id);
         if (cardElem) {
@@ -123,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
             userQty *= cert.phase2Multiplier;
         }
         
-        // Calculate user's weighted stake
+        // Calculate user's weighted stake for this specific cert
         const userWeightedStake = userQty * cert.weightingFactor;
 
         // Avoid division by zero
@@ -131,9 +129,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return 0;
         }
 
-        // Calculate user's share of daily pool
+        // Calculate user's share of daily pool for this specific cert
         const userShareFraction = userWeightedStake / globalWeightedStake;
-        return userShareFraction * dailyPool;
+        const dailyHarvest = userShareFraction * dailyPool;
+
+        return Math.max(0, dailyHarvest);
     }
 
     // We'll store the "global minted percentage" for each fish,
