@@ -492,11 +492,11 @@ document.addEventListener('DOMContentLoaded', () => {
         let sum = 0;
         let totalDailyRewards = 0;
         let longestBreakEven = 0;
-        
+
         certCards.forEach(card => {
             const q = parseInt(card.querySelector('.cert-counter input').value) || 0;
             sum += q;
-            
+
             // Get daily rate for rewards calculation
             const dailyRateEl = card.querySelector('.current-harvest');
             if (dailyRateEl) {
@@ -504,7 +504,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const dailyTokens = parseFloat(rateText.split(' ')[0]) || 0;
                 totalDailyRewards += (dailyTokens * selectedTokenPrice);
             }
-            
+
             // Check break-even days
             const beEl = card.querySelector('.break-even');
             if (beEl && beEl.textContent !== '--') {
@@ -517,12 +517,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (globalLicenseCounter) {
             globalLicenseCounter.textContent = sum.toLocaleString();
         }
-        
+
         // Update floating summary bar
         const summaryCerts = document.getElementById('summary-certs');
         const summaryDaily = document.getElementById('summary-daily');
         const summaryBep = document.getElementById('summary-bep');
-        
+
         if (summaryCerts) summaryCerts.textContent = sum.toLocaleString();
         if (summaryDaily) summaryDaily.textContent = '$' + totalDailyRewards.toFixed(2);
         if (summaryBep) summaryBep.textContent = longestBreakEven > 0 ? longestBreakEven + ' days' : '-- days';
@@ -716,38 +716,56 @@ document.addEventListener('DOMContentLoaded', () => {
         const table = document.createElement('table');
         table.classList.add('projection-table');
 
+        // Create header for years
         const thead = document.createElement('thead');
-        thead.innerHTML=`
-          <tr>
-            <th>Year</th>
-            <th>User Tokens
-              <span class="info-icon" data-tooltip="This is how many FISH tokens you’ll harvest in that year.">i</span>
-            </th>
-            <th>Cumulative Tokens
-              <span class="info-icon" data-tooltip="Total FISH tokens from start to that year.">i</span>
-            </th>
-            <th>Year Value (USD)</th>
-            <th>Cumulative Value (USD)</th>
-            <th>COR (%) 
-              <span class="info-icon" data-tooltip="Cumulative % Return on your original cost. If this is over 100%, you’re effectively beyond breakeven.">i</span>
-            </th>
-          </tr>
-        `;
+        const yearRow = document.createElement('tr');
+        yearRow.innerHTML = '<th>Metric</th>' + yearlyData.map(d => `<th>Year ${d.year}</th>`).join('');
+        thead.appendChild(yearRow);
         table.appendChild(thead);
 
+        // Create rows for each metric
         const tbody = document.createElement('tbody');
-        yearlyData.forEach(d => {
-            const row = document.createElement('tr');
-            row.innerHTML=`
-              <td>Year ${d.year}</td>
-              <td>${d.userTokens.toFixed(2)}</td>
-              <td>${d.cumTokens.toFixed(2)}</td>
-              <td>$${d.yearValue.toFixed(2)}</td>
-              <td>$${d.cumValue.toFixed(2)}</td>
-              <td>${d.cor.toFixed(2)}%</td>
-            `;
-            tbody.appendChild(row);
-        });
+
+        // User Tokens Row
+        const tokenRow = document.createElement('tr');
+        tokenRow.innerHTML = `
+            <td>User Tokens <span class="info-icon" data-tooltip="This is how many FISH tokens you'll harvest in that year.">i</span></td>
+            ${yearlyData.map(d => `<td>${d.userTokens.toFixed(2)}</td>`).join('')}
+        `;
+        tbody.appendChild(tokenRow);
+
+        // Cumulative Tokens Row
+        const cumTokenRow = document.createElement('tr');
+        cumTokenRow.innerHTML = `
+            <td>Cumulative Tokens <span class="info-icon" data-tooltip="Total FISH tokens from start to that year.">i</span></td>
+            ${yearlyData.map(d => `<td>${d.cumTokens.toFixed(2)}</td>`).join('')}
+        `;
+        tbody.appendChild(cumTokenRow);
+
+        // Year Value Row
+        const yearValueRow = document.createElement('tr');
+        yearValueRow.innerHTML = `
+            <td>Year Value (USD)</td>
+            ${yearlyData.map(d => `<td>$${d.yearValue.toFixed(2)}</td>`).join('')}
+        `;
+        tbody.appendChild(yearValueRow);
+
+        // Cumulative Value Row
+        const cumValueRow = document.createElement('tr');
+        cumValueRow.innerHTML = `
+            <td>Cumulative Value (USD)</td>
+            ${yearlyData.map(d => `<td>$${d.cumValue.toFixed(2)}</td>`).join('')}
+        `;
+        tbody.appendChild(cumValueRow);
+
+        // COR Row
+        const corRow = document.createElement('tr');
+        corRow.innerHTML = `
+            <td>COR (%) <span class="info-icon" data-tooltip="Cumulative % Return on your original cost. If this is over 100%, you're effectively beyond breakeven.">i</span></td>
+            ${yearlyData.map(d => `<td>${d.cor.toFixed(2)}%</td>`).join('')}
+        `;
+        tbody.appendChild(corRow);
+
         table.appendChild(tbody);
         financialProjections.appendChild(table);
     }
@@ -767,26 +785,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 const rect = e.target.getBoundingClientRect();
                 const viewportWidth = window.innerWidth;
                 const viewportHeight = window.innerHeight;
-                
+
                 // Add tooltip to DOM to get its dimensions
                 tooltipDiv.style.visibility = 'hidden';
                 document.body.appendChild(tooltipDiv);
                 const tipRect = tooltipDiv.getBoundingClientRect();
-                
+
                 // Calculate positions
                 let left = rect.left + window.scrollX + 20;
                 let top = rect.top + window.scrollY;
-                
+
                 // Check right edge
                 if (left + tipRect.width > viewportWidth) {
                     left = rect.left + window.scrollX - tipRect.width - 10;
                 }
-                
+
                 // Check bottom edge
                 if (top + tipRect.height > viewportHeight) {
                     top = rect.top + window.scrollY - tipRect.height;
                 }
-                
+
                 // Apply final position
                 tooltipDiv.style.left = Math.max(10, left) + 'px';
                 tooltipDiv.style.top = Math.max(10, top) + 'px';
