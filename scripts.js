@@ -139,11 +139,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // We'll store the "global minted percentage" for each fish,
     // e.g. if user sets 50% for Angel-FISH => 7500 minted globally.
     let globalPercentMinted = {
-        'angel-fish': 0,  // Start with 0 minted
-        'cod-fish': 0,    
-        'tuna-fish': 0,   
-        'sword-fish': 0,  
-        'king-fish': 0    
+        'angel-fish': 7500,  // 50% of 15000
+        'cod-fish': 6250,    // 50% of 12500
+        'tuna-fish': 5000,   // 50% of 10000
+        'sword-fish': 3750,  // 50% of 7500
+        'king-fish': 2500    // 50% of 5000
     };
 
     // 1.2. Weighted stake for "global minted" (everyone, not just the user).
@@ -274,7 +274,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (card) {
             const globalSoldEl = card.querySelector('.global-sold');
             if (globalSoldEl) {
-                globalSoldEl.textContent = `${newAmount.toLocaleString()}/${cert.totalCerts.toLocaleString()}`;
+                const percentSold = (newAmount / cert.totalCerts * 100).toFixed(1);
+                globalSoldEl.textContent = `${newAmount.toLocaleString()}/${cert.totalCerts.toLocaleString()} (${percentSold}%)`;
             }
         }
         recalcAllCards();
