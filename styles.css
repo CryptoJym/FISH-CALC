@@ -12,28 +12,17 @@
     --secondary-color: #40E0D0; /* Bright Turquoise */
     --tertiary-color: #008080; /* Vibrant Teal */
     --background-color: #000000; /* Black */
-    --card-background: rgba(0, 51, 102, 0.95); /* Deep Ocean Blue with better opacity */
+    --card-background: rgba(0, 51, 102, 0.9); /* Deep Ocean Blue with opacity */
     --gradient-start: #003366; /* Deep Ocean Blue */
     --gradient-end: #008080;   /* Vibrant Teal */
-    --max-width: 1200px; /* Reduced for better readability */
+    --max-width: 1400px;
 
-    /* Improved background contrast */
-    --card-content-bg: rgba(255, 255, 255, 0.08);
-    --highlight-color: #FFFFFF;
-    --text-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
-    
-    /* Spacing variables */
-    --spacing-sm: 0.5rem;
-    --spacing-md: 1rem;
-    --spacing-lg: 2rem;
-    
-    /* Typography */
-    --font-size-sm: 0.875rem;
-    --font-size-md: 1rem;
-    --font-size-lg: 1.25rem;
-    
-    --tooltip-bg: rgba(0, 0, 0, 0.95);
-    --box-shadow: 0 4px 6px rgba(0, 255, 255, 0.1);
+    /* A subtle background layer for text sections */
+    --card-content-bg: rgba(255, 255, 255, 0.06); 
+    --highlight-color: #FFFFFF; /* A bright highlight color */
+
+    /* Tooltip background color for .custom-tooltip */
+    --tooltip-bg: rgba(0, 0, 0, 0.85);
 }
 
 html {
@@ -133,16 +122,15 @@ h2 {
 .cert-card {
     position: relative;
     width: 100%;
-    max-width: 320px;
+    max-width: 350px;
     aspect-ratio: 2/3;
-    min-height: 600px;
+    min-height: 650px;
     perspective: 1000px;
     overflow: hidden;
-    border-radius: 16px;
-    box-shadow: var(--box-shadow);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+    transition: transform 0.3s, box-shadow 0.3s;
     margin: 0 auto;
-    backdrop-filter: blur(8px);
 }
 .cert-card:hover {
     transform: translateY(-10px);
@@ -760,23 +748,10 @@ section {
 button {
     font-family: 'Orbitron', sans-serif;
     font-weight: bold;
-    padding: var(--spacing-md) var(--spacing-lg);
-    margin: var(--spacing-sm);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border-radius: 8px;
-    letter-spacing: 0.5px;
-    cursor: pointer;
-    outline: none;
-    border: 2px solid transparent;
-}
-
-button:focus-visible {
-    box-shadow: 0 0 0 2px var(--primary-color);
-    outline: none;
-}
-
-button:active {
-    transform: translateY(1px);
+    padding: 10px 20px;
+    margin: 10px;
+    transition: background-color 0.3s, transform 0.2s;
+    border-radius: 5px;
 }
 button:hover {
     background-color: var(--secondary-color);
