@@ -180,19 +180,22 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                         </div>
 
-                        <div class="roi-estimate" style="margin-top:10px; font-size:0.9em; color:#00ffff;">
-                            <p>
-                              <strong>Harvest Rate:</strong> 
-                              <span class="current-harvest">-- tokens/day</span>
-                            </p>
-                            <p>
-                              <strong>Year1 Tokens:</strong> 
-                              <span class="year1-tokens">--</span>
-                            </p>
-                            <p>
-                              <strong>Break-even:</strong> 
-                              <span class="break-even">-- days</span>
-                            </p>
+                        <div class="cert-text-box">
+                            <h2>Harvest Metrics</h2>
+                            <div class="cert-details">
+                                <p>
+                                    <span class="label">Daily Rate:</span>
+                                    <span class="value current-harvest">-- tokens/day</span>
+                                </p>
+                                <p>
+                                    <span class="label">Year 1:</span>
+                                    <span class="value year1-tokens">--</span>
+                                </p>
+                                <p>
+                                    <span class="label">Break-even:</span>
+                                    <span class="value break-even">-- days</span>
+                                </p>
+                            </div>
                         </div>
 
                         <!-- +/- buttons + input for user cert quantity -->
