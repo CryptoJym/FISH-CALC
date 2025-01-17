@@ -258,6 +258,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     createCertCards();
     const certCards = document.querySelectorAll('.cert-card');
+    
+    // Initialize global sold display for each card
+    certData.forEach(cert => {
+        const card = document.getElementById(cert.id);
+        if (card) {
+            const globalSoldEl = card.querySelector('.global-sold');
+            if (globalSoldEl) {
+                const globalAmount = globalPercentMinted[cert.id];
+                globalSoldEl.textContent = `${globalAmount.toLocaleString()}/${cert.totalCerts.toLocaleString()}`;
+            }
+        }
+    });
 
     // 1.4. We might also have a UI for global minted percentages. 
     // This code snippet assumes you have sliders or inputs somewhere 
