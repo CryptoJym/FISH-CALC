@@ -490,13 +490,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateGlobalLicenseCount() {
         let sum = 0;
+        let totalDailyRewards = 0;
+        let longestBreakEven = 0;
+        
         certCards.forEach(card => {
             const q = parseInt(card.querySelector('.cert-counter input').value) || 0;
             sum += q;
+            
+            // Get daily rate for rewards calculation
+            const dailyRateEl = card.querySelector('.current-harvest');
+            if (dailyRateEl) {
+                const rateText = dailyRateEl.textContent;
+                const dailyTokens = parseFloat(rateText.split(' ')[0]) || 0;
+                totalDailyRewards += (dailyTokens * selectedTokenPrice);
+            }
+            
+            // Check break-even days
+            const beEl = card.querySelector('.break-even');
+            if (beEl && beEl.textContent !== '--') {
+                const days = parseInt(beEl.textContent) || 0;
+                if (days > longestBreakEven) longestBreakEven = days;
+            }
         });
-        if(globalLicenseCounter) {
+
+        // Update all summary values
+        if (globalLicenseCounter) {
             globalLicenseCounter.textContent = sum.toLocaleString();
         }
+        
+        // Update floating summary bar
+        const summaryCerts = document.getElementById('summary-certs');
+        const summaryDaily = document.getElementById('summary-daily');
+        const summaryBep = document.getElementById('summary-bep');
+        
+        if (summaryCerts) summaryCerts.textContent = sum.toLocaleString();
+        if (summaryDaily) summaryDaily.textContent = '$' + totalDailyRewards.toFixed(2);
+        if (summaryBep) summaryBep.textContent = longestBreakEven > 0 ? longestBreakEven + ' days' : '-- days';
     }
 
     // For all cards (like if minted slider changed, or user changed token price radio):
