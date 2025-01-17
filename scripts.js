@@ -624,6 +624,7 @@ document.addEventListener('DOMContentLoaded', () => {
         opt.addEventListener('change', () => {
             selectedTokenPrice = parseFloat(opt.value);
             recalcAllCards();
+            updateGlobalLicenseCount(); // Add this to update summary bar
             if(collectionCreated) updateCalculations();
         });
     });
