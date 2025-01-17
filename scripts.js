@@ -493,10 +493,12 @@ document.addEventListener('DOMContentLoaded', () => {
         let totalDailyRewards = 0;
         let longestBreakEven = 0;
         
+
         certCards.forEach(card => {
             const q = parseInt(card.querySelector('.cert-counter input').value) || 0;
             sum += q;
             
+
             // Get daily rate for rewards calculation
             const dailyRateEl = card.querySelector('.current-harvest');
             if (dailyRateEl) {
@@ -505,6 +507,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 totalDailyRewards += (dailyTokens * selectedTokenPrice);
             }
             
+
             // Check break-even days
             const beEl = card.querySelector('.break-even');
             if (beEl && beEl.textContent !== '--') {
@@ -518,11 +521,13 @@ document.addEventListener('DOMContentLoaded', () => {
             globalLicenseCounter.textContent = sum.toLocaleString();
         }
         
+
         // Update floating summary bar
         const summaryCerts = document.getElementById('summary-certs');
         const summaryDaily = document.getElementById('summary-daily');
         const summaryBep = document.getElementById('summary-bep');
         
+
         if (summaryCerts) summaryCerts.textContent = sum.toLocaleString();
         if (summaryDaily) summaryDaily.textContent = '$' + totalDailyRewards.toFixed(2);
         if (summaryBep) summaryBep.textContent = longestBreakEven > 0 ? longestBreakEven + ' days' : '-- days';
@@ -644,7 +649,80 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateCalculations(){
         const yearlyData = computeYearlyRewards();
         buildChart(yearlyData);
-        buildProjectionTable(yearlyData);
+        buildProjectionTableTransposed(yearlyData);
+    }
+
+    /**
+     * Build a TRANSPOSED table:
+     *   -> Columns: Year 1 ... Year 10
+     *   -> Rows: 
+     *       "User Tokens"
+     *       "Cumulative Tokens"
+     *       "Year Value (USD)"
+     *       "Cumulative Value (USD)"
+     *       "COR (%)"
+     */
+    function buildProjectionTableTransposed(yearlyData){
+        financialProjections.innerHTML='';
+
+        // Create a table and a <thead>
+        const table = document.createElement('table');
+        table.classList.add('projection-table');
+
+        const thead = document.createElement('thead');
+        // The 1st row: first cell is blank, then "Year 1", "Year 2", ...
+        let headRow = `<tr><th></th>`;
+        yearlyData.forEach(d => {
+            headRow += `<th>Year ${d.year}</th>`;
+        });
+        headRow += `</tr>`;
+        thead.innerHTML = headRow;
+        table.appendChild(thead);
+
+        // Now let's define the metrics we want as separate "rows"
+        // Each row has a "label" and a "key" to get from the data
+        const metrics = [
+            { label:'Yearly Tokens',     key:'userTokens',    tooltip:'How many FISH tokens you harvest in that year.' },
+            { label:'Cumulative Tokens', key:'cumTokens',      tooltip:'Total tokens from all previous years plus this year.' },
+            { label:'Year Value (USD)',  key:'yearValue',      tooltip:'Approx USD from that year\'s tokens.' },
+            { label:'Cumulative Value (USD)', key:'cumValue',  tooltip:'Total USD across all years so far.' },
+            { label:'COR (%)',          key:'cor',            tooltip:'Cumulative % Return on your original purchase cost.' },
+        ];
+
+        // Tbody
+        const tbody = document.createElement('tbody');
+
+        // For each metric (row), we build a <tr>
+        metrics.forEach(m => {
+            let rowHtml = `<tr>
+                <td>${m.label} 
+                    <span class="info-icon" data-tooltip="${m.tooltip}">i</span>
+                </td>`;
+
+            // Now for each year from yearlyData
+            yearlyData.forEach(d => {
+                let val = d[m.key];
+                // Format the value
+                let cellText = '';
+                if(m.key === 'cor') {
+                    cellText = val.toFixed(2) + '%';
+                }
+                else if(m.key === 'yearValue' || m.key === 'cumValue') {
+                    cellText = '$' + val.toFixed(2);
+                }
+                else {
+                    // userTokens or cumTokens => 2 decimals
+                    cellText = val.toFixed(2);
+                }
+                rowHtml += `<td>${cellText}</td>`;
+            });
+            rowHtml += `</tr>`;
+
+            tbody.innerHTML += rowHtml;
+        });
+
+        table.appendChild(tbody);
+        financialProjections.appendChild(table);
     }
 
     function buildChart(yearlyData){
@@ -711,47 +789,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function buildProjectionTable(yearlyData){
-        financialProjections.innerHTML='';
-        const table = document.createElement('table');
-        table.classList.add('projection-table');
-
-        const thead = document.createElement('thead');
-        thead.innerHTML=`
-          <tr>
-            <th>Year</th>
-            <th>User Tokens
-              <span class="info-icon" data-tooltip="This is how many FISH tokens you’ll harvest in that year.">i</span>
-            </th>
-            <th>Cumulative Tokens
-              <span class="info-icon" data-tooltip="Total FISH tokens from start to that year.">i</span>
-            </th>
-            <th>Year Value (USD)</th>
-            <th>Cumulative Value (USD)</th>
-            <th>COR (%) 
-              <span class="info-icon" data-tooltip="Cumulative % Return on your original cost. If this is over 100%, you’re effectively beyond breakeven.">i</span>
-            </th>
-          </tr>
-        `;
-        table.appendChild(thead);
-
-        const tbody = document.createElement('tbody');
-        yearlyData.forEach(d => {
-            const row = document.createElement('tr');
-            row.innerHTML=`
-              <td>Year ${d.year}</td>
-              <td>${d.userTokens.toFixed(2)}</td>
-              <td>${d.cumTokens.toFixed(2)}</td>
-              <td>$${d.yearValue.toFixed(2)}</td>
-              <td>$${d.cumValue.toFixed(2)}</td>
-              <td>${d.cor.toFixed(2)}%</td>
-            `;
-            tbody.appendChild(row);
-        });
-        table.appendChild(tbody);
-        financialProjections.appendChild(table);
-    }
-
     /**************************************************************
      * 10. OPTIONAL: Info-Icon Tooltips for advanced terms
      **************************************************************/
@@ -768,25 +805,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 const viewportWidth = window.innerWidth;
                 const viewportHeight = window.innerHeight;
                 
+
                 // Add tooltip to DOM to get its dimensions
                 tooltipDiv.style.visibility = 'hidden';
                 document.body.appendChild(tooltipDiv);
                 const tipRect = tooltipDiv.getBoundingClientRect();
                 
+
                 // Calculate positions
                 let left = rect.left + window.scrollX + 20;
                 let top = rect.top + window.scrollY;
                 
+
                 // Check right edge
                 if (left + tipRect.width > viewportWidth) {
                     left = rect.left + window.scrollX - tipRect.width - 10;
                 }
                 
+
                 // Check bottom edge
                 if (top + tipRect.height > viewportHeight) {
                     top = rect.top + window.scrollY - tipRect.height;
                 }
                 
+
                 // Apply final position
                 tooltipDiv.style.left = Math.max(10, left) + 'px';
                 tooltipDiv.style.top = Math.max(10, top) + 'px';
