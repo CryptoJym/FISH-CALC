@@ -274,8 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (card) {
             const globalSoldEl = card.querySelector('.global-sold');
             if (globalSoldEl) {
-                const percentSold = (newAmount / cert.totalCerts * 100).toFixed(1);
-                globalSoldEl.textContent = `${newAmount.toLocaleString()}/${cert.totalCerts.toLocaleString()} (${percentSold}%)`;
+                globalSoldEl.textContent = `${newAmount.toLocaleString()}/${cert.totalCerts.toLocaleString()}`;
             }
         }
         recalcAllCards();
