@@ -271,9 +271,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 1.4. We might also have a UI for global minted percentages. 
-    // This code snippet assumes you have sliders or inputs somewhere 
-    // that call `updateGlobalMinted(fishId, newPercent)`.
+    // 1.4. Handle global minted percentage sliders
+    const globalSliders = document.querySelectorAll('.slider-group input[type="range"]');
+    globalSliders.forEach(slider => {
+        const fishId = slider.id.replace('-global-range', '');
+        const valueDisplay = document.getElementById(`${fishId}-val`);
+        
+        slider.addEventListener('input', (e) => {
+            const percent = e.target.value;
+            valueDisplay.textContent = `${percent}%`;
+            const cert = certData.find(c => c.id === fishId);
+            const newAmount = Math.floor((percent / 100) * cert.totalCerts);
+            updateGlobalMinted(fishId, newAmount);
+        });
+    });
 
     function updateGlobalMinted(fishId, newAmount) {
         const cert = certData.find(c => c.id === fishId);
