@@ -851,9 +851,14 @@ button:hover {
     position: absolute;
     background: var(--tooltip-bg);
     color: #fff;
-    padding: 5px 8px;
+    padding: 8px 12px;
     border-radius: 5px;
     font-size: 0.8em;
     pointer-events: none;
-    white-space: nowrap;
+    max-width: 300px;
+    white-space: normal;
+    word-wrap: break-word;
+    z-index: 10000;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    line-height: 1.4;
 }

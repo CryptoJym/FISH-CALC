@@ -733,8 +733,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.body.appendChild(tooltipDiv);
 
                 const rect = e.target.getBoundingClientRect();
-                tooltipDiv.style.left = (rect.left + window.scrollX + 20) + 'px';
-                tooltipDiv.style.top  = (rect.top + window.scrollY) + 'px';
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+                
+                // Add tooltip to DOM to get its dimensions
+                tooltipDiv.style.visibility = 'hidden';
+                document.body.appendChild(tooltipDiv);
+                const tipRect = tooltipDiv.getBoundingClientRect();
+                
+                // Calculate positions
+                let left = rect.left + window.scrollX + 20;
+                let top = rect.top + window.scrollY;
+                
+                // Check right edge
+                if (left + tipRect.width > viewportWidth) {
+                    left = rect.left + window.scrollX - tipRect.width - 10;
+                }
+                
+                // Check bottom edge
+                if (top + tipRect.height > viewportHeight) {
+                    top = rect.top + window.scrollY - tipRect.height;
+                }
+                
+                // Apply final position
+                tooltipDiv.style.left = Math.max(10, left) + 'px';
+                tooltipDiv.style.top = Math.max(10, top) + 'px';
+                tooltipDiv.style.visibility = 'visible';
 
                 e.target.addEventListener('mouseout', () => {
                     if(tooltipDiv) tooltipDiv.remove();
