@@ -184,20 +184,14 @@ h2 {
     width: 100%;
     height: 100%;
     backface-visibility: hidden;
-    background-color: var(--card-background);
+    background-color: #000000;
     border-radius: 10px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     padding: 20px;
-
-    /* Subtle gradient on both sides */
-    background-image: linear-gradient(
-        to bottom,
-        var(--card-background),
-        rgba(0, 51, 102, 0.7)
-    );
+    border: 1px solid var(--primary-color);
 }
 
 .cert-front {
