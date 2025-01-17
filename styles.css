@@ -551,37 +551,55 @@ h2 {
 
 /* Financial Projections */
 #financial-projections {
-    width: 90%;
+    width: 95%;
     max-width: 1200px;
     margin: 40px auto;
+    overflow-x: auto;
+    background: rgba(0, 20, 40, 0.3);
+    padding: 20px;
+    border-radius: 15px;
 }
 .projection-table {
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     margin-bottom: 40px;
     width: 100%;
     table-layout: auto;
+    font-size: 0.95em;
 }
 .projection-table thead th {
     position: sticky;
     top: 0;
-    background-color: rgba(0, 51, 102, 0.95);
+    background: linear-gradient(180deg, rgba(0, 51, 102, 0.98), rgba(0, 51, 102, 0.95));
     color: var(--secondary-color);
     z-index: 10;
+    padding: 20px 15px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--primary-color);
 }
 .projection-table th,
 .projection-table td {
-    border: 1px solid var(--primary-color);
+    border: 1px solid rgba(0, 255, 255, 0.1);
     padding: 15px;
-    text-align: center;
+    text-align: right;
     color: var(--primary-color);
     white-space: nowrap;
     position: relative;
 }
+.projection-table td:first-child {
+    text-align: left;
+    font-weight: bold;
+    color: var(--secondary-color);
+    padding-left: 20px;
+    background: rgba(0, 51, 102, 0.4);
+}
 .projection-table tr:nth-child(even) {
-    background-color: rgba(255, 255, 255, 0.04);
+    background-color: rgba(255, 255, 255, 0.02);
 }
 .projection-table tr:hover {
-    background-color: rgba(255, 255, 255, 0.08);
+    background-color: rgba(0, 255, 255, 0.05);
 }
 .table-container {
     overflow-x: auto;
