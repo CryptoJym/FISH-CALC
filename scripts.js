@@ -654,57 +654,77 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const activeType = document.querySelector('.graph-toggle-button.active')?.dataset.type || 'harvesting';
 
-        // If userTokens are all 0 => hide
-        const anyTokens = yearlyData.some(d => d.userTokens > 0);
-        if(!anyTokens){
+        // Get active fish types (ones user has selected)
+        const activeFish = certData.filter(cd => {
+            const card = document.getElementById(cd.id);
+            const qty = parseInt(card.querySelector('.cert-counter input').value) || 0;
+            return qty > 0;
+        });
+
+        if(activeFish.length === 0) {
             chartCanvas.style.display = 'none';
             financialProjections.innerHTML='<p>Please select at least one CERT to view projections.</p>';
             return;
-        } else {
-            chartCanvas.style.display = 'block';
         }
 
-        // Prepare data
-        const labels  = yearlyData.map(d => 'Year '+ d.year);
-        let dataArr   = [];
-        let yAxisType = 'linear';
-        let labelText = '';
+        chartCanvas.style.display = 'block';
+        const labels = yearlyData.map(d => 'Year '+ d.year);
+        let datasets = [];
+        let yAxisType = activeType === 'harvesting' ? 'linear' : 'logarithmic';
 
-        if(activeType === 'harvesting'){
-            dataArr   = yearlyData.map(d => d.userTokens);
-            labelText = 'Yearly Tokens';
-        } else {
-            dataArr   = yearlyData.map(d => d.cor);
-            labelText = 'COR (%)';
-            yAxisType = 'logarithmic';
-        }
+        // Calculate per-fish metrics
+        activeFish.forEach(fish => {
+            const card = document.getElementById(fish.id);
+            const qty = parseInt(card.querySelector('.cert-counter input').value) || 0;
+            
+            const yearlyMetrics = yearlyData.map((yd, idx) => {
+                const year = idx + 1;
+                const multiplier = year >= phase2StartYear ? fish.phase2Multiplier : 1;
+                const weightedQty = qty * fish.weightingFactor * multiplier;
+                if(activeType === 'harvesting') {
+                    return (weightedQty / yd.globalW) * yd.totalTokens;
+                } else {
+                    const cost = getUserCost(fish, qty);
+                    return cost > 0 ? ((weightedQty / yd.globalW) * yd.totalValue / cost) * 100 : 0;
+                }
+            });
 
-        // Build or destroy old chart
+            datasets.push({
+                label: fish.name,
+                data: yearlyMetrics,
+                borderColor: fish.certColor,
+                fill: false
+            });
+        });
+
         if(chartInstance) chartInstance.destroy();
 
         const ctx = chartCanvas.getContext('2d');
         chartInstance = new Chart(ctx, {
             type:'line',
-            data:{
+            data: {
                 labels,
-                datasets:[{
-                    label: labelText,
-                    data: dataArr,
-                    borderColor:'#FFDD00',
-                    fill:false
-                }]
+                datasets
             },
             options:{
-                responsive:true,
+                responsive: true,
                 scales:{
                     y:{
                         type: yAxisType,
-                        beginAtZero: (activeType!=='cor'),
+                        beginAtZero: true,
                         ticks:{
                             callback: (val) => {
-                                if(activeType==='cor') return val + '%';
+                                if(activeType === 'cor') return val + '%';
                                 return val;
                             }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            color: '#00FFFF'
                         }
                     }
                 }
