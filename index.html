@@ -34,25 +34,8 @@
         </div>
     </div>
 
-    <!-- PURCHASE BUTTON + GLOBAL COUNTER -->
-    <div id="purchase-button-container">
-        <button id="purchase-button">
-            Create Collection
-        </button>
-        <div id="global-counter">
-            <div class="counter-item">
-                <div class="counter-content">
-                    <div class="counter-label">
-                        Total CERTs:
-                        <span class="counter-value">0</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- GLOBAL MINTED PERCENTAGE CONTROLS -->
-    <div id="global-minted-controls">
+    <!-- GLOBAL MINTED PERCENTAGE CONTROLS was moved to top -->
+    <div id="global-minted-controls" style="display: none;">
         <h2>Global Minted Percentage</h2>
         <p style="font-size: 0.9em; text-align:center; max-width:600px; margin: 0 auto 15px;">
             Adjust the minted percentage for each type of FISH CERT to see how 
@@ -93,21 +76,7 @@
     </div>
     <!-- END Global Minted Controls -->
 
-    <!-- OPTIONAL: Floating Summary Bar -->
-    <div id="floating-summary" class="floating-summary">
-        <p>Total CERTs: <span id="summary-certs">0</span></p>
-        <p>Est. Daily Rewards: <span id="summary-daily">$0</span></p>
-        <p>Break-even: <span id="summary-bep">-- days</span></p>
-    </div>
-    <!-- END Floating Summary Bar -->
-
-    <div class="container">
-        <!-- USER COLLECTION: filled after user hits "Create Collection" -->
-        <div id="user-collection" style="display: none;">
-            <!-- After purchase, the user’s chosen CERTs will appear here. -->
-        </div>
-
-        <!-- TOKEN PRICE -->
+    <!-- TOKEN PRICE -->
         <div id="token-price-container" style="display: none;">
             <h2>Set Token Price</h2>
             <p style="font-size:0.9em; max-width:600px; margin:10px auto; text-align:center;">
@@ -137,6 +106,38 @@
                 </div>
             </div>
         </div>
+
+    <!-- PURCHASE BUTTON + GLOBAL COUNTER -->
+    <div id="purchase-button-container">
+        <button id="purchase-button">
+            Create Collection
+        </button>
+        <div id="global-counter">
+            <div class="counter-item">
+                <div class="counter-content">
+                    <div class="counter-label">
+                        Total CERTs:
+                        <span class="counter-value">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OPTIONAL: Floating Summary Bar -->
+    <div id="floating-summary" class="floating-summary">
+        <p>Total CERTs: <span id="summary-certs">0</span></p>
+        <p>Est. Daily Rewards: <span id="summary-daily">$0</span></p>
+        <p>Break-even: <span id="summary-bep">-- days</span></p>
+    </div>
+    <!-- END Floating Summary Bar -->
+
+    <div class="container">
+        <!-- USER COLLECTION: filled after user hits "Create Collection" -->
+        <div id="user-collection" style="display: none;">
+            <!-- After purchase, the user’s chosen CERTs will appear here. -->
+        </div>
+
 
         <!-- FINANCIAL PROJECTIONS -->
         <div id="financial-projections-container" style="display: none;">

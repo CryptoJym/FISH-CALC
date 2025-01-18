@@ -558,11 +558,10 @@ document.addEventListener('DOMContentLoaded', () => {
         collectionCreated = true;
         updateUserCollection();
 
-        // Reveal the previously hidden sections
-        userCollectionDiv.style.display         = 'block';
-        tokenPriceContainer.style.display       = 'block';
+        // Reveal the remaining hidden sections
+        userCollectionDiv.style.display = 'block';
         financialProjectionsContainer.style.display = 'block';
-        graphContainer.style.display            = 'block';
+        graphContainer.style.display = 'block';
 
         // Then do calculations
         updateCalculations();
