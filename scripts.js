@@ -708,15 +708,28 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             options:{
                 responsive: true,
+                maintainAspectRatio: false,
                 scales:{
                     y:{
                         type: yAxisType,
                         beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 255, 255, 0.1)'
+                        },
                         ticks:{
+                            color: '#00FFFF',
                             callback: (val) => {
                                 if(activeType === 'cor') return val + '%';
                                 return val;
                             }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(0, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#00FFFF'
                         }
                     }
                 },
@@ -724,7 +737,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     legend: {
                         position: 'top',
                         labels: {
-                            color: '#00FFFF'
+                            color: '#00FFFF',
+                            font: {
+                                family: 'Orbitron'
+                            }
                         }
                     }
                 }

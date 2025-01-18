@@ -539,14 +539,14 @@ h2 {
     margin-bottom: 20px;
 }
 #chartCanvas {
-    width: 1200px;
-    height: 800px;
+    display: block;
+    width: 100%;
+    height: 600px;
     background-color: var(--card-background);
     border: 2px solid var(--primary-color);
     border-radius: 15px;
     box-shadow: 0 0 25px rgba(0, 255, 255, 0.3);
     margin: 0 auto;
-    max-width: none;
 }
 
 /* Financial Projections */
