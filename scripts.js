@@ -682,11 +682,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const multiplier = year >= phase2StartYear ? fish.phase2Multiplier : 1;
                 const weightedQty = qty * fish.weightingFactor * multiplier;
                 if(activeType === 'harvesting') {
-                    return (weightedQty / yd.globalW) * yearPool[year];
+                    return (weightedQty / yd.globalW) * yd.totalTokens;
                 } else {
                     const cost = getUserCost(fish, qty);
-                    const yearTokenValue = yearPool[year] * selectedTokenPrice;
-                    return cost > 0 ? ((weightedQty / yd.globalW) * yearTokenValue / cost) * 100 : 0;
+                    return cost > 0 ? ((weightedQty / yd.globalW) * yd.totalValue / cost) * 100 : 0;
                 }
             });
 
