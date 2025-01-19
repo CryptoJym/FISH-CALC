@@ -461,7 +461,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Calculate year1 tokens
             const y1El = card.querySelector('.year1-tokens');
-            if(y1El) y1El.textContent = (dailyRate*365).toFixed(2)+' tokens';
+            if(y1El) y1El.textContent = Math.round(dailyRate*365).toLocaleString()+' tokens';
 
             // Calculate break-even
             const dailyUSD = dailyRate * selectedTokenPrice;
@@ -555,7 +555,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const dailyRate = calcDailyRateForCert(cDef);
             card.querySelector('.current-harvest').textContent  = dailyRate.toFixed(2)+' tokens/day';
-            card.querySelector('.year1-tokens').textContent      = (dailyRate*365).toFixed(2)+' tokens';
+            card.querySelector('.year1-tokens').textContent      = Math.round(dailyRate*365).toLocaleString()+' tokens';
 
             const dailyUSD = dailyRate* selectedTokenPrice;
             let beDays = '--';
