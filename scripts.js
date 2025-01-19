@@ -246,12 +246,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const mintedCount = Math.floor((val/100)* cDef.totalCerts);
             globalMinted[fishId] = mintedCount;
 
-            // Update the card's "Global Sold" text
+            // Update the card's "Global Sold" text and current price
             const card = document.getElementById(fishId);
             if (card) {
                 const globalSoldEl = card.querySelector('.global-sold');
                 if (globalSoldEl) {
-                    globalSoldEl.textContent = `${mintedCount.toLocaleString()} / ${cDef.totalCerts.toLocaleString()}`;
+                    const currentPrice = getCurrentPriceForCert(cDef, mintedCount);
+                    globalSoldEl.textContent = `${mintedCount.toLocaleString()} / ${cDef.totalCerts.toLocaleString()} (Current Price: $${currentPrice})`;
                 }
             }
 
