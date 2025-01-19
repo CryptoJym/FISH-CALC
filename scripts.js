@@ -573,14 +573,21 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update collection first
         updateUserCollection();
 
+        // Set collection as created
+        collectionCreated = true;
+
         // Reveal the previously hidden sections
         userCollectionDiv.style.display = 'block';
         tokenPriceContainer.style.display = 'block';
         financialProjectionsContainer.style.display = 'block';
         graphContainer.style.display = 'block';
 
-        // Do calculations
+        // Do calculations and ensure graph is visible
         updateCalculations();
+        const chartCanvas = document.getElementById('chartCanvas');
+        if (chartCanvas) {
+            chartCanvas.style.display = 'block';
+        }
     });
 
     function updateUserCollection(){
