@@ -673,8 +673,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let yAxisType = activeType === 'harvesting' ? 'linear' : 'logarithmic';
 
         // Calculate per-fish metrics
-        const yearPool = computeYearlyPools();
-        
         activeFish.forEach(fish => {
             const card = document.getElementById(fish.id);
             const qty = parseInt(card.querySelector('.cert-counter input').value) || 0;
@@ -684,10 +682,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const multiplier = year >= phase2StartYear ? fish.phase2Multiplier : 1;
                 const weightedQty = qty * fish.weightingFactor * multiplier;
                 if(activeType === 'harvesting') {
-                    return (weightedQty / yd.globalW) * yearPool[year];
+                    return (weightedQty / yd.globalW) * yd.userTokens;
                 } else {
                     const cost = getUserCost(fish, qty);
-                    return cost > 0 ? ((weightedQty / yd.globalW) * (yearPool[year] * selectedTokenPrice) / cost) * 100 : 0;
+                    return cost > 0 ? ((weightedQty / yd.globalW) * yd.yearValue / cost) * 100 : 0;
                 }
             });
 
