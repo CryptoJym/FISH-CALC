@@ -87,11 +87,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Tracking how many are minted globally (in #, not %).
     // The range sliders let the user adjust minted % => these get converted to these numbers.
     let globalMinted = {
-        'angel-fish': 7500,   // 50% of 15000
-        'cod-fish': 6250,     // 50% of 12500
-        'tuna-fish': 5000,    // 50% of 10000
-        'sword-fish': 3750,   // 50% of 7500
-        'king-fish': 2500     // 50% of 5000
+        'angel-fish': 750,    // 5% of 15000
+        'cod-fish': 625,      // 5% of 12500
+        'tuna-fish': 500,     // 5% of 10000
+        'sword-fish': 375,    // 5% of 7500
+        'king-fish': 250      // 5% of 5000
     };
 
     // DOM references
