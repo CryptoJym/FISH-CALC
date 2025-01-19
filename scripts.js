@@ -555,8 +555,6 @@ document.addEventListener('DOMContentLoaded', () => {
      * 7. “Create Collection” => finalize user selection
      **************************************************************/
     purchaseButton.addEventListener('click', () => {
-        if (collectionCreated) return;
-        
         // Update collection first
         updateUserCollection();
 
@@ -566,11 +564,8 @@ document.addEventListener('DOMContentLoaded', () => {
         financialProjectionsContainer.style.display = 'block';
         graphContainer.style.display = 'block';
 
-        // Do calculations before setting collectionCreated
+        // Do calculations
         updateCalculations();
-        
-        // Set created state after everything is done
-        collectionCreated = true;
     });
 
     function updateUserCollection(){
