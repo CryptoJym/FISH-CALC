@@ -677,15 +677,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const card = document.getElementById(fish.id);
             const qty = parseInt(card.querySelector('.cert-counter input').value) || 0;
             
-            const yearlyMetrics = yearlyData.map((yd, idx) => {
-                const year = idx + 1;
-                const multiplier = year >= phase2StartYear ? fish.phase2Multiplier : 1;
+            const yearlyMetrics = yearlyData.map((yd) => {
+                const multiplier = yd.year >= phase2StartYear ? fish.phase2Multiplier : 1;
                 const weightedQty = qty * fish.weightingFactor * multiplier;
+                const { userW, globalW } = getWeightedStake(yd.year);
+                
                 if(activeType === 'harvesting') {
-                    return (weightedQty / yd.globalW) * yd.userTokens;
+                    return (weightedQty / globalW) * yd.userTokens;
                 } else {
                     const cost = getUserCost(fish, qty);
-                    return cost > 0 ? ((weightedQty / yd.globalW) * yd.yearValue / cost) * 100 : 0;
+                    return cost > 0 ? ((weightedQty / globalW) * yd.yearValue / cost) * 100 : 0;
                 }
             });
 
