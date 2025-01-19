@@ -227,6 +227,11 @@ h2 {
     background: var(--card-content-bg);
 }
 
+.cert-back .cert-text-box {
+    padding: 3px;
+    margin-bottom: 3px;
+}
+
 .cert-image-box {
     height: 150px;
     overflow: hidden;
@@ -234,7 +239,17 @@ h2 {
 }
 
 .cert-text-box h2 {
+    margin: 2px 0;
+    font-size: 1.1em;
+}
+
+.cert-back .cert-details {
     margin-top: 5px;
+    font-size: 0.9em;
+}
+
+.cert-back .cert-details p {
+    margin: 2px 0;
 }
 
 .cert-image {
