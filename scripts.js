@@ -576,18 +576,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // Set collection as created
         collectionCreated = true;
 
-        // Reveal the previously hidden sections
-        userCollectionDiv.style.display = 'block';
-        tokenPriceContainer.style.display = 'block';
-        financialProjectionsContainer.style.display = 'block';
-        graphContainer.style.display = 'block';
+        // Reveal only sections that exist
+        if (userCollectionDiv) userCollectionDiv.style.display = 'block';
+        if (financialProjectionsContainer) financialProjectionsContainer.style.display = 'block';
+        if (graphContainer) graphContainer.style.display = 'block';
 
         // Do calculations and ensure graph is visible
         updateCalculations();
-        const chartCanvas = document.getElementById('chartCanvas');
-        if (chartCanvas) {
-            chartCanvas.style.display = 'block';
-        }
     });
 
     function updateUserCollection(){
