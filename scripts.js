@@ -556,17 +556,21 @@ document.addEventListener('DOMContentLoaded', () => {
      **************************************************************/
     purchaseButton.addEventListener('click', () => {
         if (collectionCreated) return;
-        collectionCreated = true;
+        
+        // Update collection first
         updateUserCollection();
 
         // Reveal the previously hidden sections
-        userCollectionDiv.style.display         = 'block';
-        tokenPriceContainer.style.display       = 'block';
+        userCollectionDiv.style.display = 'block';
+        tokenPriceContainer.style.display = 'block';
         financialProjectionsContainer.style.display = 'block';
-        graphContainer.style.display            = 'block';
+        graphContainer.style.display = 'block';
 
-        // Then do calculations
+        // Do calculations before setting collectionCreated
         updateCalculations();
+        
+        // Set created state after everything is done
+        collectionCreated = true;
     });
 
     function updateUserCollection(){
