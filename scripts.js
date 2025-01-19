@@ -431,6 +431,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function setQty(newVal) {
             const cDef = certData.find(x => x.id === fishId);
+            if (!cDef) return;
+
             const safeVal = Math.max(0, Math.min(newVal, cDef.totalCerts));
             qtyInput.value = safeVal;
 
@@ -438,21 +440,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const userQtyEl = card.querySelector('.user-qty');
             if(userQtyEl) userQtyEl.textContent = safeVal;
 
-            // cost
+            // Calculate cost
             const cost = getUserCost(cDef, safeVal);
             const costEl = card.querySelector('.total-cost-value');
             if(costEl) costEl.textContent = '$'+ cost.toLocaleString();
 
-            // daily rate
+            // Calculate daily rate
             const dailyRate = calcDailyRateForCert(cDef);
             const harvestEl = card.querySelector('.current-harvest');
             if(harvestEl) harvestEl.textContent = dailyRate.toFixed(2)+' tokens/day';
 
-            // year1 tokens
+            // Calculate year1 tokens
             const y1El = card.querySelector('.year1-tokens');
             if(y1El) y1El.textContent = (dailyRate*365).toFixed(2)+' tokens';
 
-            // break-even
+            // Calculate break-even
             const dailyUSD = dailyRate * selectedTokenPrice;
             const beEl = card.querySelector('.break-even');
             if(beEl) {
@@ -463,28 +465,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 beEl.textContent = beDays;
             }
 
-            // refresh total
+            // Update totals
             updateGlobalLicenseCount();
             if(collectionCreated) updateCalculations();
         }
 
         function updateQty(delta) {
-            const oldVal = parseInt(qtyInput.value) || 0;
-            setQty(oldVal + delta);
+            const currentVal = parseInt(qtyInput.value) || 0;
+            setQty(currentVal + delta);
         }
 
         plusBtn.addEventListener('click', e => {
             e.stopPropagation();
+            e.preventDefault();
             updateQty(1);
         });
+
         minusBtn.addEventListener('click', e => {
             e.stopPropagation();
+            e.preventDefault();
             updateQty(-1);
         });
-        qtyInput.addEventListener('change', e => {
+
+        qtyInput.addEventListener('input', e => {
             e.stopPropagation();
-            const v = parseInt(e.target.value) || 0;
-            setQty(v);
+            const val = parseInt(e.target.value) || 0;
+            setQty(val);
         });
     });
 
