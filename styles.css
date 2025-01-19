@@ -833,9 +833,10 @@ button:hover {
 }
 .slider-group {
     display: grid;
-    grid-template-columns: 120px 1fr 50px;
+    grid-template-columns: 120px 1fr 140px;
     align-items: center;
     gap: 10px;
+    margin-bottom: 8px;
 }
 .slider-group label {
     color: var(--secondary-color);
