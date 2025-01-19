@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
             id: 'angel-fish',
             name: 'Angel-FISH',
             imageSrc: 'assets/Angel-FISH-NBG-sml.png',
+            imageSrcNBG: 'assets/Angel-FISH-NBG.jpg', // Added NBG image source
             altText: 'Angel-FISH Icon',
             totalCerts: 15000,
             weightingFactor: 0.25,
@@ -20,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
             id: 'cod-fish',
             name: 'Cod-FISH',
             imageSrc: 'assets/Cod-FISH-NBG-sml.png',
+            imageSrcNBG: 'assets/Cod-FISH-NBG.jpg', // Added NBG image source
             altText: 'Cod-FISH Icon',
             totalCerts: 12500,
             weightingFactor: 0.50,
@@ -33,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
             id: 'tuna-fish',
             name: 'Tuna-FISH',
             imageSrc: 'assets/Tuna-FISH-NBG-sml.png',
+            imageSrcNBG: 'assets/Tuna-FISH-NBG.jpg', // Added NBG image source
             altText: 'Tuna-FISH Icon',
             totalCerts: 10000,
             weightingFactor: 0.75,
@@ -46,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
             id: 'sword-fish',
             name: 'Sword-FISH',
             imageSrc: 'assets/Sword-FISH-NBG-sml.png',
+            imageSrcNBG: 'assets/Sword-FISH-NBG.jpg', // Added NBG image source
             altText: 'Sword-FISH Icon',
             totalCerts: 7500,
             weightingFactor: 1.00,
@@ -59,6 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
             id: 'king-fish',
             name: 'King-FISH',
             imageSrc: 'assets/King-FISH-NBG-sml.png',
+            imageSrcNBG: 'assets/King-FISH-NBG.jpg', // Added NBG image source
             altText: 'King-FISH Icon',
             totalCerts: 5000,
             weightingFactor: 1.25,
@@ -128,7 +133,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="cert-front">
                         <div class="cert-image-box">
                             <div class="cert-image">
-                                <img src="${cert.imageSrc}" alt="${cert.altText}" width="200" height="200" loading="lazy">
+                                <img src="${cert.imageSrc}" 
+                                     srcset="${cert.imageSrc} 1x, ${cert.imageSrcNBG} 2x" // Added srcset attribute
+                                     alt="${cert.altText}" width="200" height="200" loading="lazy">
                             </div>
                         </div>
                         <div class="cert-text-box">
@@ -238,12 +245,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const fishId = slider.id.replace('-global-range','');
             const labelSpan = document.getElementById(`${fishId}-val`);
             const countSpan = document.getElementById(`${fishId}-count`);
-            
+
             const cert = certData.find(cd => cd.id === fishId);
             if (!cert) return;
-            
+
             const count = Math.floor((val/100) * cert.totalCerts);
-            
+
             if (labelSpan) labelSpan.textContent = val + '%';
             if (countSpan) countSpan.textContent = `${count.toLocaleString()}/${cert.totalCerts.toLocaleString()}`;
 
@@ -501,6 +508,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const val = parseInt(e.target.value) || 0;
             setQty(val);
         });
+
+        // Add touch event listeners for better mobile experience
+        plusBtn.addEventListener('touchstart', e => {
+            e.preventDefault();
+            updateQty(1);
+        });
+        minusBtn.addEventListener('touchstart', e => {
+            e.preventDefault();
+            updateQty(-1);
+        });
+        qtyInput.addEventListener('touchend', e => {
+            const val = parseInt(e.target.value) || 0;
+            setQty(val);
+        });
+
     });
 
     function updateGlobalLicenseCount() {
@@ -698,12 +720,12 @@ document.addEventListener('DOMContentLoaded', () => {
         activeFish.forEach(fish => {
             const card = document.getElementById(fish.id);
             const qty = parseInt(card.querySelector('.cert-counter input').value) || 0;
-            
+
             const yearlyMetrics = yearlyData.map((yd) => {
                 const multiplier = yd.year >= phase2StartYear ? fish.phase2Multiplier : 1;
                 const weightedQty = qty * fish.weightingFactor * multiplier;
                 const { userW, globalW } = getWeightedStake(yd.year);
-                
+
                 if(activeType === 'harvesting') {
                     return (weightedQty / globalW) * yd.userTokens;
                 } else {
