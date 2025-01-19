@@ -57,17 +57,23 @@
 
         <!-- GLOBAL MINTED PERCENTAGE CONTROLS -->
         <div id="global-minted-controls">
-            <h2>Step 2: Select the Percentage of Each Tier That Has Sold</h2>
+            <h2>Step 2: Set CERT Number Sold</h2>
             <p style="font-size: 0.9em; text-align:center; max-width:600px; margin: 0 auto 15px;">
-                As more CERTs sell, the purchase price rises and your daily rewards decrease. 
-                This slider defaults to 5% for each tier.
+                CERTs impact returns in two ways:<br>
+                1. For every 100 sold, the price goes up<br>
+                2. For every CERT staked the harvesting changes for every other CERT<br><br>
+                By selecting how many have sold, you are able to get a visual of returns under those conditions. 
+                If this is your first time using this calculator, just leave the settings as they are.
             </p>
             <div class="slider-container">
                 <!-- Angel-FISH -->
                 <div class="slider-group">
                     <label>Angel-FISH:</label>
                     <input type="range" min="0" max="100" value="5" id="angel-fish-global-range" />
-                    <span class="slider-value" id="angel-fish-val">5%</span>
+                    <div class="value-display">
+                        <span class="slider-count" id="angel-fish-count">750/15000</span>
+                        <span class="slider-value" id="angel-fish-val">5%</span>
+                    </div>
                 </div>
                 <!-- Cod-FISH -->
                 <div class="slider-group">

@@ -237,7 +237,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const val = parseInt(e.target.value);
             const fishId = slider.id.replace('-global-range','');
             const labelSpan = document.getElementById(`${fishId}-val`);
+            const countSpan = document.getElementById(`${fishId}-count`);
+            
+            const cert = certData.find(cd => cd.id === fishId);
+            if (!cert) return;
+            
+            const count = Math.floor((val/100) * cert.totalCerts);
+            
             if (labelSpan) labelSpan.textContent = val + '%';
+            if (countSpan) countSpan.textContent = `${count.toLocaleString()}/${cert.totalCerts.toLocaleString()}`;
 
             const cDef = certData.find(cd => cd.id===fishId);
             if (!cDef) return;
