@@ -832,15 +832,22 @@ button:hover {
     margin-top: 10px;
 }
 .slider-group {
-    display: grid;
-    grid-template-columns: 120px 1fr 140px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+.slider-group .slider-header {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
 }
 .slider-group label {
     color: var(--secondary-color);
     font-weight: bold;
+}
+.slider-group input[type="range"] {
+    width: 100%;
 }
 .slider-group input[type="range"] {
     width: 100%;
