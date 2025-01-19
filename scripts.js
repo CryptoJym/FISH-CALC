@@ -555,6 +555,7 @@ document.addEventListener('DOMContentLoaded', () => {
      * 7. “Create Collection” => finalize user selection
      **************************************************************/
     purchaseButton.addEventListener('click', () => {
+        if (collectionCreated) return;
         collectionCreated = true;
         updateUserCollection();
 
