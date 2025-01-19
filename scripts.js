@@ -667,7 +667,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function buildChart(yearlyData){
         const chartCanvas = document.getElementById('chartCanvas');
-        if(!chartCanvas) return;
+        const chartContainer = document.querySelector('.chart-container');
+        if(!chartCanvas || !chartContainer) return;
+
+        // Ensure chart container is visible
+        chartContainer.style.display = 'block';
+        chartCanvas.style.display = 'block';
 
         const activeType = document.querySelector('.graph-toggle-button.active')?.dataset.type || 'harvesting';
 
