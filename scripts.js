@@ -686,7 +686,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     return (weightedQty / globalW) * yd.userTokens;
                 } else {
                     const cost = getUserCost(fish, qty);
-                    return cost > 0 ? ((weightedQty / globalW) * yd.yearValue / cost) * 100 : 0;
+                    if (cost <= 0) return 0;
+                    const yearlyReturn = ((weightedQty / globalW) * yearPool[yd.year] * selectedTokenPrice);
+                    return (yearlyReturn / cost) * 100;
                 }
             });
 
