@@ -673,6 +673,8 @@ document.addEventListener('DOMContentLoaded', () => {
         let yAxisType = activeType === 'harvesting' ? 'linear' : 'logarithmic';
 
         // Calculate per-fish metrics
+        const yearPool = computeYearlyPools();
+        
         activeFish.forEach(fish => {
             const card = document.getElementById(fish.id);
             const qty = parseInt(card.querySelector('.cert-counter input').value) || 0;
