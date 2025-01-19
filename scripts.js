@@ -687,8 +687,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     const cost = getUserCost(fish, qty);
                     if (cost <= 0) return 0;
-                    const yearlyReturn = ((weightedQty / globalW) * yearPool[yd.year] * selectedTokenPrice);
-                    return (yearlyReturn / cost) * 100;
+                    // Calculate COR using yearly value from yearlyData
+                    return ((yd.yearValue / cost) * 100);
                 }
             });
 
