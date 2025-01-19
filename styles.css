@@ -29,10 +29,17 @@ html {
     -webkit-text-size-adjust: 100%;
 }
 
+@font-face {
+    font-family: 'Eurostile';
+    src: url('attached_assets/Eurostile-ExtendedTwo.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
 body {
     background-color: var(--background-color);
     color: var(--primary-color);
-    font-family: 'Orbitron', sans-serif;
+    font-family: 'Eurostile', 'Orbitron', sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
     position: relative;
@@ -778,7 +785,7 @@ section {
 }
 
 button {
-    font-family: 'Orbitron', sans-serif;
+    font-family: 'Eurostile', 'Orbitron', sans-serif;
     font-weight: bold;
     padding: 10px 20px;
     margin: 10px;
