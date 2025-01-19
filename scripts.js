@@ -232,8 +232,20 @@ document.addEventListener('DOMContentLoaded', () => {
      * 3. GLOBAL MINTED SLIDERS => Adjust minted% => stored in globalMinted
      **************************************************************/
     const mintedSliders = document.querySelectorAll('.slider-group input[type="range"]');
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
     mintedSliders.forEach(slider => {
-        slider.addEventListener('input', e => {
+        const debouncedUpdate = debounce(e => {
             const val = parseInt(e.target.value);
             const fishId = slider.id.replace('-global-range','');
             const labelSpan = document.getElementById(`${fishId}-val`);
@@ -340,8 +352,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Our main function to compute user’s yearly distribution
     function computeYearlyRewards() {
-        const yearPool = computeYearlyPools();
-        const userTotalCost = getUserTotalCostAll();
+        try {
+            const yearPool = computeYearlyPools();
+            const userTotalCost = getUserTotalCostAll();
+            if (!yearPool || !userTotalCost) {
+                console.warn('Invalid computation inputs');
+                return [];
+            }
 
         let cumTokens = 0;
         const results = [];
@@ -712,6 +729,10 @@ document.addEventListener('DOMContentLoaded', () => {
             options:{
                 responsive: true,
                 maintainAspectRatio: false,
+                animation: {
+                    duration: 750,
+                    easing: 'easeInOutQuart'
+                },
                 scales:{
                     y:{
                         type: yAxisType,

@@ -571,8 +571,9 @@ h2 {
     border-spacing: 0;
     margin-bottom: 40px;
     width: 100%;
-    table-layout: auto;
+    table-layout: fixed;
     font-size: 0.95em;
+    min-width: 800px;
 }
 .projection-table thead th {
     position: sticky;
