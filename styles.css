@@ -93,11 +93,28 @@ h1 {
 }
 
 h2 {
-    font-size: clamp(1.2rem, 3vw, 2rem);
+    font-size: clamp(1.4rem, 3.2vw, 2.2rem);
     margin: 40px 0 20px;
     text-align: center;
     color: var(--secondary-color);
-    text-shadow: 0 0 5px rgba(64, 224, 208, 0.7);
+    text-shadow: 0 0 8px rgba(64, 224, 208, 0.8);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 800;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 10px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.step-instruction {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.85);
+    max-width: 600px;
+    margin: 15px auto;
+    line-height: 1.6;
+    font-weight: 300;
 }
 
 /* Collection Grid */
