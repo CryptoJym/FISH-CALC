@@ -954,3 +954,25 @@ button:hover {
     margin-top: 40px;
     padding-bottom: 60px; /* Add space for floating bar */
 }
+
+.buy-now-button {
+    display: inline-block;
+    background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+    color: var(--primary-color);
+    padding: 15px 40px;
+    border: 2px solid var(--primary-color);
+    border-radius: 10px;
+    font-size: 1.2rem;
+    font-family: 'Orbitron', sans-serif;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    margin: 20px auto;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+}
+
+.buy-now-button:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0, 255, 255, 0.5);
+    background: var(--primary-color);
+    color: var(--background-color);
+}
