@@ -238,12 +238,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const fishId = slider.id.replace('-global-range','');
             const labelSpan = document.getElementById(`${fishId}-val`);
             const countSpan = document.getElementById(`${fishId}-count`);
-            
+
             const cert = certData.find(cd => cd.id === fishId);
             if (!cert) return;
-            
+
             const count = Math.floor((val/100) * cert.totalCerts);
-            
+
             if (labelSpan) labelSpan.textContent = val + '%';
             if (countSpan) countSpan.textContent = `${count.toLocaleString()}/${cert.totalCerts.toLocaleString()}`;
 
@@ -254,27 +254,34 @@ document.addEventListener('DOMContentLoaded', () => {
                     input.type = 'text';
                     input.className = 'slider-count-input';
                     input.value = count;
-                    
+
                     input.onblur = function() {
                         let newVal = parseInt(this.value.replace(/,/g, ''));
                         if (isNaN(newVal)) newVal = 0;
                         newVal = Math.min(Math.max(0, newVal), cert.totalCerts);
-                        
+
                         const percentage = (newVal / cert.totalCerts) * 100;
                         slider.value = percentage;
                         countSpan.textContent = `${newVal.toLocaleString()}/${cert.totalCerts.toLocaleString()}`;
-                        
+
                         // Update global minted
                         globalMinted[fishId] = newVal;
+
+                        // Update displays and calculations
+                        updateGlobalSoldDisplay();
                         recalcAllCards();
+                        updateGlobalLicenseCount();
+                        if(collectionCreated) {
+                            updateCalculations();
+                        }
                     };
-                    
+
                     input.onkeypress = function(e) {
                         if (e.key === 'Enter') {
                             this.blur();
                         }
                     };
-                    
+
                     countSpan.textContent = '';
                     countSpan.appendChild(input);
                     input.focus();
@@ -732,12 +739,12 @@ document.addEventListener('DOMContentLoaded', () => {
         activeFish.forEach(fish => {
             const card = document.getElementById(fish.id);
             const qty = parseInt(card.querySelector('.cert-counter input').value) || 0;
-            
+
             const yearlyMetrics = yearlyData.map((yd) => {
                 const multiplier = yd.year >= phase2StartYear ? fish.phase2Multiplier : 1;
                 const weightedQty = qty * fish.weightingFactor * multiplier;
                 const { userW, globalW } = getWeightedStake(yd.year);
-                
+
                 if(activeType === 'harvesting') {
                     return (weightedQty / globalW) * yd.userTokens;
                 } else {
