@@ -878,9 +878,24 @@ button:hover {
 }
 
 .slider-count {
-    color: var(--secondary-color);
     font-size: 0.9em;
-    margin-bottom: 2px;
+    margin-right: 10px;
+    cursor: pointer;
+    color: var(--primary-color);
+}
+
+.slider-count:hover {
+    color: var(--secondary-color);
+}
+
+.slider-count-input {
+    background: transparent;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    font-size: 0.9em;
+    padding: 2px 4px;
+    width: 80px;
+    text-align: right;
 }
 
 .slider-value {

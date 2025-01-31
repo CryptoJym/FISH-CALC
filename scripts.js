@@ -247,6 +247,40 @@ document.addEventListener('DOMContentLoaded', () => {
             if (labelSpan) labelSpan.textContent = val + '%';
             if (countSpan) countSpan.textContent = `${count.toLocaleString()}/${cert.totalCerts.toLocaleString()}`;
 
+            // Make count numbers editable on click
+            if (countSpan) {
+                countSpan.addEventListener('click', function(e) {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.className = 'slider-count-input';
+                    input.value = count;
+                    
+                    input.onblur = function() {
+                        let newVal = parseInt(this.value.replace(/,/g, ''));
+                        if (isNaN(newVal)) newVal = 0;
+                        newVal = Math.min(Math.max(0, newVal), cert.totalCerts);
+                        
+                        const percentage = (newVal / cert.totalCerts) * 100;
+                        slider.value = percentage;
+                        countSpan.textContent = `${newVal.toLocaleString()}/${cert.totalCerts.toLocaleString()}`;
+                        
+                        // Update global minted
+                        globalMinted[fishId] = newVal;
+                        recalcAllCards();
+                    };
+                    
+                    input.onkeypress = function(e) {
+                        if (e.key === 'Enter') {
+                            this.blur();
+                        }
+                    };
+                    
+                    countSpan.textContent = '';
+                    countSpan.appendChild(input);
+                    input.focus();
+                });
+            }
+
             const cDef = certData.find(cd => cd.id===fishId);
             if (!cDef) return;
 
