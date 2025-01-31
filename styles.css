@@ -965,6 +965,48 @@ button:hover {
     line-height: 1.4;
 }
 
+/* Selected CERTs Display */
+.selected-certs-display {
+    position: fixed;
+    bottom: 60px;
+    left: 20px;
+    z-index: 1000;
+    background: rgba(0, 51, 102, 0.9);
+    border: 1px solid var(--primary-color);
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+}
+
+.selected-certs-list {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    max-width: 300px;
+}
+
+.selected-cert-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid var(--secondary-color);
+}
+
+.selected-cert-item img {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+}
+
+.selected-cert-count {
+    color: var(--primary-color);
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
 /* OPTIONAL: Disclaimers / More Info (example) */
 .container:last-of-type {
     margin-top: 40px;

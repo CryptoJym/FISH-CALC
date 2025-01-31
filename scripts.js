@@ -247,25 +247,25 @@ document.addEventListener('DOMContentLoaded', () => {
             if (labelSpan) labelSpan.textContent = val + '%';
             if (countSpan) {
                 countSpan.textContent = `${count.toLocaleString()}/${cert.totalCerts.toLocaleString()}`;
-                
+
                 // Make count number clickable and editable
                 countSpan.style.cursor = 'pointer';
                 countSpan.onclick = function(e) {
                     // Prevent multiple inputs from being created
                     if (e.target.tagName === 'INPUT') return;
-                    
+
                     const input = document.createElement('input');
                     input.type = 'number';
                     input.value = count;
                     input.className = 'slider-count-input';
                     input.min = 0;
                     input.max = cert.totalCerts;
-                    
+
                     // Select all text when focused
                     input.onfocus = function() {
                         this.select();
                     };
-                    
+
                     // Handle keyboard navigation
                     input.onkeydown = function(e) {
                         if (e.key === 'Enter') {
@@ -283,19 +283,19 @@ document.addEventListener('DOMContentLoaded', () => {
                             this.value = newVal;
                         }
                     };
-                    
+
                     input.onblur = function() {
                         const newCount = Math.min(Math.max(0, parseInt(this.value) || 0), cert.totalCerts);
                         const newPercentage = (newCount / cert.totalCerts) * 100;
                         slider.value = newPercentage;
-                        
+
                         // Update all displays
                         labelSpan.textContent = newPercentage.toFixed(0) + '%';
                         countSpan.textContent = `${newCount.toLocaleString()}/${cert.totalCerts.toLocaleString()}`;
-                        
+
                         // Update global minted
                         globalMinted[fishId] = newCount;
-                        
+
                         // Update card displays
                         const card = document.getElementById(fishId);
                         if (card) {
@@ -305,18 +305,18 @@ document.addEventListener('DOMContentLoaded', () => {
                                 globalSoldEl.textContent = `${newCount.toLocaleString()} / ${cert.totalCerts.toLocaleString()} (Current Price: $${currentPrice})`;
                             }
                         }
-                        
+
                         // Recalculate everything
                         recalcAllCards();
                         updateGlobalLicenseCount();
                     };
-                    
+
                     input.onkeypress = function(e) {
                         if (e.key === 'Enter') {
                             this.blur();
                         }
                     };
-                    
+
                     countSpan.textContent = '';
                     countSpan.appendChild(input);
                     input.focus();
@@ -584,9 +584,24 @@ document.addEventListener('DOMContentLoaded', () => {
         let totalDailyRewards = 0;
         let longestBreakEven = 0;
 
+        // Update selected certs display
+        const selectedCertsList = document.querySelector('.selected-certs-list');
+        selectedCertsList.innerHTML = '';
+
         certCards.forEach(card => {
             const q = parseInt(card.querySelector('.cert-counter input').value) || 0;
             sum += q;
+
+            if (q > 0) {
+                const certImg = card.querySelector('.cert-image img').getAttribute('src');
+                const certItem = document.createElement('div');
+                certItem.className = 'selected-cert-item';
+                certItem.innerHTML = `
+                    <img src="${certImg}" alt="Selected CERT">
+                    <span class="selected-cert-count">×${q}</span>
+                `;
+                selectedCertsList.appendChild(certItem);
+            }
 
             // Get daily rate for rewards calculation
             const dailyRateEl = card.querySelector('.current-harvest');
