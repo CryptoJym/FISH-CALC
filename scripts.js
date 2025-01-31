@@ -214,19 +214,20 @@ document.addEventListener('DOMContentLoaded', () => {
     createCertCards();
     const certCards = document.querySelectorAll('.cert-card');
 
-    // Initialize "Global Sold" text for each card
-    function initGlobalSoldDisplay() {
+    // Initialize and update Global Sold text for cards
+    function updateGlobalSoldDisplay() {
         certData.forEach(cert => {
             const card = document.getElementById(cert.id);
             if (!card) return;
             const globalSoldEl = card.querySelector('.global-sold');
             if (globalSoldEl) {
                 const mintedNum = globalMinted[cert.id] || 0;
-                globalSoldEl.textContent = `${mintedNum.toLocaleString()} / ${cert.totalCerts.toLocaleString()}`;
+                const currentPrice = getCurrentPriceForCert(cert, mintedNum);
+                globalSoldEl.textContent = `${mintedNum.toLocaleString()} / ${cert.totalCerts.toLocaleString()} (Current Price: $${currentPrice})`;
             }
         });
     }
-    initGlobalSoldDisplay();
+    updateGlobalSoldDisplay();
 
     /**************************************************************
      * 3. GLOBAL MINTED SLIDERS => Adjust minted% => stored in globalMinted
@@ -263,12 +264,22 @@ document.addEventListener('DOMContentLoaded', () => {
                         const percentage = (newVal / cert.totalCerts) * 100;
                         slider.value = percentage;
                         countSpan.textContent = `${newVal.toLocaleString()}/${cert.totalCerts.toLocaleString()}`;
+                        labelSpan.textContent = percentage.toFixed(0) + '%';
 
                         // Update global minted
                         globalMinted[fishId] = newVal;
 
-                        // Update displays and calculations
-                        updateGlobalSoldDisplay();
+                        // Update card displays
+                        const card = document.getElementById(fishId);
+                        if (card) {
+                            const globalSoldEl = card.querySelector('.global-sold');
+                            if (globalSoldEl) {
+                                const currentPrice = getCurrentPriceForCert(cert, newVal);
+                                globalSoldEl.textContent = `${newVal.toLocaleString()} / ${cert.totalCerts.toLocaleString()} (Current Price: $${currentPrice})`;
+                            }
+                        }
+
+                        // Recalculate everything
                         recalcAllCards();
                         updateGlobalLicenseCount();
                         if(collectionCreated) {
