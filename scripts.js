@@ -671,28 +671,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const priceOpts = document.getElementsByName('token-price');
-    const customPriceInput = document.getElementById('custom-price');
-
     priceOpts.forEach(opt => {
         opt.addEventListener('change', () => {
             selectedTokenPrice = parseFloat(opt.value);
-            customPriceInput.value = ''; // Clear custom input when preset selected
             recalcAllCards();
-            updateGlobalLicenseCount();
+            updateGlobalLicenseCount(); // Add this to update summary bar
             if(collectionCreated) updateCalculations();
         });
-    });
-
-    customPriceInput.addEventListener('input', (e) => {
-        const value = parseFloat(e.target.value);
-        if (!isNaN(value) && value >= 0) {
-            selectedTokenPrice = value;
-            // Uncheck any selected radio buttons
-            priceOpts.forEach(opt => opt.checked = false);
-            recalcAllCards();
-            updateGlobalLicenseCount();
-            if(collectionCreated) updateCalculations();
-        }
     });
 
     const graphToggleBtns = document.querySelectorAll('.graph-toggle-button');
