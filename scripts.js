@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <div class="cert-details">
                                 <p>
                                   <span class="label">Global Sold:</span>
-                                  <span class="value global-sold">
+                                  <span class="value global-sold" contenteditable="true">
                                      0 / ${cert.totalCerts.toLocaleString()}
                                   </span>
                                 </p>
@@ -238,12 +238,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const fishId = slider.id.replace('-global-range','');
             const labelSpan = document.getElementById(`${fishId}-val`);
             const countSpan = document.getElementById(`${fishId}-count`);
-            
+
             const cert = certData.find(cd => cd.id === fishId);
             if (!cert) return;
-            
+
             const count = Math.floor((val/100) * cert.totalCerts);
-            
+
             if (labelSpan) labelSpan.textContent = val + '%';
             if (countSpan) countSpan.textContent = `${count.toLocaleString()}/${cert.totalCerts.toLocaleString()}`;
 
@@ -698,12 +698,12 @@ document.addEventListener('DOMContentLoaded', () => {
         activeFish.forEach(fish => {
             const card = document.getElementById(fish.id);
             const qty = parseInt(card.querySelector('.cert-counter input').value) || 0;
-            
+
             const yearlyMetrics = yearlyData.map((yd) => {
                 const multiplier = yd.year >= phase2StartYear ? fish.phase2Multiplier : 1;
                 const weightedQty = qty * fish.weightingFactor * multiplier;
                 const { userW, globalW } = getWeightedStake(yd.year);
-                
+
                 if(activeType === 'harvesting') {
                     return (weightedQty / globalW) * yd.userTokens;
                 } else {
@@ -877,5 +877,46 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, { once: true });
             }
         }
+    });
+
+    // Add event listener for editable global sold counts
+    const globalSoldElements = document.querySelectorAll('.global-sold');
+    globalSoldElements.forEach(element => {
+        element.addEventListener('input', function() {
+            const text = this.textContent;
+            const parts = text.split('/');
+            if (parts.length === 2) {
+                const sold = parseInt(parts[0].replace(/[^0-9]/g, '')) || 0;
+                const total = parseInt(parts[1].replace(/[^0-9]/g, '')) || 0;
+                const fishId = this.parentElement.parentElement.parentElement.parentElement.id;
+
+                if (!isNaN(sold) && sold >= 0 && sold <= total) {
+                    globalMinted[fishId] = sold;
+                    recalcAllCards();
+                    updateGlobalLicenseCount();
+                } else {
+                    this.textContent = `${globalMinted[fishId] || 0} / ${total}`;
+                }
+            }
+        });
+        element.addEventListener('blur', function() {
+            const text = this.textContent;
+            const parts = text.split('/');
+            if (parts.length === 2) {
+                const sold = parseInt(parts[0].replace(/[^0-9]/g, '')) || 0;
+                const total = parseInt(parts[1].replace(/[^0-9]/g, '')) || 0;
+                const fishId = this.parentElement.parentElement.parentElement.parentElement.id;
+
+                if (!isNaN(sold) && sold >= 0 && sold <= total) {
+                    globalMinted[fishId] = sold;
+                    const currentPrice = getCurrentPriceForCert(certData.find(x => x.id === fishId), sold);
+                    this.textContent = `${sold.toLocaleString()} / ${total} (Current Price: $${currentPrice})`;
+                } else {
+                    this.textContent = `${globalMinted[fishId] || 0} / ${total}`;
+                }
+            }
+            recalcAllCards();
+            updateGlobalLicenseCount();
+        });
     });
 });
