@@ -250,13 +250,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Make count number clickable and editable
                 countSpan.style.cursor = 'pointer';
-                countSpan.onclick = function() {
+                countSpan.onclick = function(e) {
+                    // Prevent multiple inputs from being created
+                    if (e.target.tagName === 'INPUT') return;
+                    
                     const input = document.createElement('input');
                     input.type = 'number';
                     input.value = count;
-                    input.style.width = '100px';
-                    input.style.padding = '2px';
-                    input.style.fontSize = '0.9em';
+                    input.className = 'slider-count-input';
+                    input.min = 0;
+                    input.max = cert.totalCerts;
+                    
+                    // Select all text when focused
+                    input.onfocus = function() {
+                        this.select();
+                    };
+                    
+                    // Handle keyboard navigation
+                    input.onkeydown = function(e) {
+                        if (e.key === 'Enter') {
+                            this.blur();
+                        } else if (e.key === 'Escape') {
+                            this.value = count;
+                            this.blur();
+                        } else if (e.key === 'ArrowUp') {
+                            e.preventDefault();
+                            const newVal = Math.min(parseInt(this.value) + 1, cert.totalCerts);
+                            this.value = newVal;
+                        } else if (e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            const newVal = Math.max(parseInt(this.value) - 1, 0);
+                            this.value = newVal;
+                        }
+                    };
                     
                     input.onblur = function() {
                         const newCount = Math.min(Math.max(0, parseInt(this.value) || 0), cert.totalCerts);

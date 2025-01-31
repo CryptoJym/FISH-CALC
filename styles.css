@@ -992,3 +992,28 @@ button:hover {
     background: var(--primary-color);
     color: var(--background-color);
 }
+.slider-count-input {
+    width: 80px;
+    background: var(--card-background);
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    padding: 4px 8px;
+    font-size: 0.9em;
+    text-align: center;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.slider-count-input:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 2px rgba(0, 255, 255, 0.2);
+}
+
+.slider-count {
+    transition: opacity 0.2s ease;
+}
+
+.slider-count:hover {
+    opacity: 0.8;
+}
