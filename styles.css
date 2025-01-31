@@ -878,22 +878,9 @@ button:hover {
 }
 
 .slider-count {
+    color: var(--secondary-color);
     font-size: 0.9em;
-    margin-right: 10px;
-}
-
-.slider-count.clickable {
-    cursor: pointer;
-}
-
-.slider-count-input {
-    width: 80px;
-    background: var(--card-background); /* Assuming you want the same background as the card */
-    color: var(--primary-color); /* Assuming you want the primary color for text */
-    border: 1px solid var(--primary-color);
-    padding: 2px 4px;
-    font-size: 0.9em;
-    text-align: center; /* Center the text within the input */
+    margin-bottom: 2px;
 }
 
 .slider-value {
