@@ -222,39 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const globalSoldEl = card.querySelector('.global-sold');
             if (globalSoldEl) {
                 const mintedNum = globalMinted[cert.id] || 0;
-                globalSoldEl.textContent = `${mintedNum.toLocaleString()}/${cert.totalCerts.toLocaleString()}`;
-            }
-
-            // Initialize click-to-edit for count spans
-            const countSpan = document.getElementById(`${cert.id}-count`);
-            const slider = document.getElementById(`${cert.id}-global-range`);
-            if (countSpan && slider) {
-                countSpan.onclick = function() {
-                    const input = document.createElement('input');
-                    input.type = 'number';
-                    input.className = 'slider-count-input';
-                    input.value = globalMinted[cert.id];
-                    input.max = cert.totalCerts;
-                    input.min = 0;
-
-                    input.onblur = function() {
-                        const newCount = Math.min(Math.max(0, parseInt(input.value) || 0), cert.totalCerts);
-                        const newPercent = Math.round((newCount / cert.totalCerts) * 100);
-                        slider.value = newPercent;
-                        countSpan.textContent = `${newCount.toLocaleString()}/${cert.totalCerts.toLocaleString()}`;
-                        globalMinted[cert.id] = newCount;
-
-                        const labelSpan = document.getElementById(`${cert.id}-val`);
-                        if (labelSpan) labelSpan.textContent = newPercent + '%';
-
-                        recalcAllCards();
-                        if (collectionCreated) updateCalculations();
-                    };
-
-                    countSpan.textContent = '';
-                    countSpan.appendChild(input);
-                    input.focus();
-                };
+                globalSoldEl.textContent = `${mintedNum.toLocaleString()} / ${cert.totalCerts.toLocaleString()}`;
             }
         });
     }
@@ -270,12 +238,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const fishId = slider.id.replace('-global-range','');
             const labelSpan = document.getElementById(`${fishId}-val`);
             const countSpan = document.getElementById(`${fishId}-count`);
-
+            
             const cert = certData.find(cd => cd.id === fishId);
             if (!cert) return;
-
+            
             const count = Math.floor((val/100) * cert.totalCerts);
-
+            
             if (labelSpan) labelSpan.textContent = val + '%';
             if (countSpan) {
                 countSpan.textContent = `${count.toLocaleString()}/${cert.totalCerts.toLocaleString()}`;
@@ -286,21 +254,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     input.value = count;
                     input.max = cert.totalCerts;
                     input.min = 0;
-
+                    
                     input.onblur = function() {
                         const newCount = Math.min(Math.max(0, parseInt(input.value) || 0), cert.totalCerts);
                         const newPercent = Math.round((newCount / cert.totalCerts) * 100);
                         slider.value = newPercent;
                         countSpan.textContent = `${newCount.toLocaleString()}/${cert.totalCerts.toLocaleString()}`;
                         globalMinted[fishId] = newCount;
-
+                        
                         const labelSpan = document.getElementById(`${fishId}-val`);
                         if (labelSpan) labelSpan.textContent = newPercent + '%';
-
+                        
                         recalcAllCards();
                         if (collectionCreated) updateCalculations();
                     };
-
+                    
                     countSpan.textContent = '';
                     countSpan.appendChild(input);
                     input.focus();
@@ -758,12 +726,12 @@ document.addEventListener('DOMContentLoaded', () => {
         activeFish.forEach(fish => {
             const card = document.getElementById(fish.id);
             const qty = parseInt(card.querySelector('.cert-counter input').value) || 0;
-
+            
             const yearlyMetrics = yearlyData.map((yd) => {
                 const multiplier = yd.year >= phase2StartYear ? fish.phase2Multiplier : 1;
                 const weightedQty = qty * fish.weightingFactor * multiplier;
                 const { userW, globalW } = getWeightedStake(yd.year);
-
+                
                 if(activeType === 'harvesting') {
                     return (weightedQty / globalW) * yd.userTokens;
                 } else {
@@ -862,7 +830,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <td>Cumulative Tokens <span class="info-icon" data-tooltip="Total FISH tokens from start to that year.">i</span></td>
             ${yearlyData.map(d => `<td>${d.cumTokens.toFixed(2)}</td>`).join('')}
         `;
-        tbody.appendChildcumTokenRow);
+        tbody.appendChild(cumTokenRow);
 
         // Year Value Row
         const yearValueRow = document.createElement('tr');
