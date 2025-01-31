@@ -245,7 +245,57 @@ document.addEventListener('DOMContentLoaded', () => {
             const count = Math.floor((val/100) * cert.totalCerts);
 
             if (labelSpan) labelSpan.textContent = val + '%';
-            if (countSpan) countSpan.textContent = `${count.toLocaleString()}/${cert.totalCerts.toLocaleString()}`;
+            if (countSpan) {
+                countSpan.textContent = `${count.toLocaleString()}/${cert.totalCerts.toLocaleString()}`;
+                
+                // Make count number clickable and editable
+                countSpan.style.cursor = 'pointer';
+                countSpan.onclick = function() {
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.value = count;
+                    input.style.width = '100px';
+                    input.style.padding = '2px';
+                    input.style.fontSize = '0.9em';
+                    
+                    input.onblur = function() {
+                        const newCount = Math.min(Math.max(0, parseInt(this.value) || 0), cert.totalCerts);
+                        const newPercentage = (newCount / cert.totalCerts) * 100;
+                        slider.value = newPercentage;
+                        
+                        // Update all displays
+                        labelSpan.textContent = newPercentage.toFixed(0) + '%';
+                        countSpan.textContent = `${newCount.toLocaleString()}/${cert.totalCerts.toLocaleString()}`;
+                        
+                        // Update global minted
+                        globalMinted[fishId] = newCount;
+                        
+                        // Update card displays
+                        const card = document.getElementById(fishId);
+                        if (card) {
+                            const globalSoldEl = card.querySelector('.global-sold');
+                            if (globalSoldEl) {
+                                const currentPrice = getCurrentPriceForCert(cert, newCount);
+                                globalSoldEl.textContent = `${newCount.toLocaleString()} / ${cert.totalCerts.toLocaleString()} (Current Price: $${currentPrice})`;
+                            }
+                        }
+                        
+                        // Recalculate everything
+                        recalcAllCards();
+                        updateGlobalLicenseCount();
+                    };
+                    
+                    input.onkeypress = function(e) {
+                        if (e.key === 'Enter') {
+                            this.blur();
+                        }
+                    };
+                    
+                    countSpan.textContent = '';
+                    countSpan.appendChild(input);
+                    input.focus();
+                };
+            }
 
             const cDef = certData.find(cd => cd.id===fishId);
             if (!cDef) return;

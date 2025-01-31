@@ -878,12 +878,15 @@ button:hover {
 }
 
 .slider-count {
+    color: var(--secondary-color);
     font-size: 0.9em;
-    margin-right: 10px;
+    margin-bottom: 2px;
+    cursor: pointer;
+    transition: color 0.2s;
 }
 
-.slider-count.clickable {
-    cursor: pointer;
+.slider-count:hover {
+    color: var(--primary-color);
 }
 
 .slider-count-input {
