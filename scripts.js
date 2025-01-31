@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <div class="cert-details">
                                 <p>
                                   <span class="label">Global Sold:</span>
-                                  <span class="value global-sold">
+                                  <span class="value global-sold" contenteditable="true">
                                      0 / ${cert.totalCerts.toLocaleString()}
                                   </span>
                                 </p>
@@ -214,20 +214,19 @@ document.addEventListener('DOMContentLoaded', () => {
     createCertCards();
     const certCards = document.querySelectorAll('.cert-card');
 
-    // Initialize and update Global Sold text for cards
-    function updateGlobalSoldDisplay() {
+    // Initialize "Global Sold" text for each card
+    function initGlobalSoldDisplay() {
         certData.forEach(cert => {
             const card = document.getElementById(cert.id);
             if (!card) return;
             const globalSoldEl = card.querySelector('.global-sold');
             if (globalSoldEl) {
                 const mintedNum = globalMinted[cert.id] || 0;
-                const currentPrice = getCurrentPriceForCert(cert, mintedNum);
-                globalSoldEl.textContent = `${mintedNum.toLocaleString()} / ${cert.totalCerts.toLocaleString()} (Current Price: $${currentPrice})`;
+                globalSoldEl.textContent = `${mintedNum.toLocaleString()} / ${cert.totalCerts.toLocaleString()}`;
             }
         });
     }
-    updateGlobalSoldDisplay();
+    initGlobalSoldDisplay();
 
     /**************************************************************
      * 3. GLOBAL MINTED SLIDERS => Adjust minted% => stored in globalMinted
@@ -247,57 +246,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (labelSpan) labelSpan.textContent = val + '%';
             if (countSpan) countSpan.textContent = `${count.toLocaleString()}/${cert.totalCerts.toLocaleString()}`;
-
-            // Make count numbers editable on click
-            if (countSpan) {
-                countSpan.addEventListener('click', function(e) {
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.className = 'slider-count-input';
-                    input.value = count;
-
-                    input.onblur = function() {
-                        let newVal = parseInt(this.value.replace(/,/g, ''));
-                        if (isNaN(newVal)) newVal = 0;
-                        newVal = Math.min(Math.max(0, newVal), cert.totalCerts);
-
-                        const percentage = (newVal / cert.totalCerts) * 100;
-                        slider.value = percentage;
-                        countSpan.textContent = `${newVal.toLocaleString()}/${cert.totalCerts.toLocaleString()}`;
-                        labelSpan.textContent = percentage.toFixed(0) + '%';
-
-                        // Update global minted
-                        globalMinted[fishId] = newVal;
-
-                        // Update card displays
-                        const card = document.getElementById(fishId);
-                        if (card) {
-                            const globalSoldEl = card.querySelector('.global-sold');
-                            if (globalSoldEl) {
-                                const currentPrice = getCurrentPriceForCert(cert, newVal);
-                                globalSoldEl.textContent = `${newVal.toLocaleString()} / ${cert.totalCerts.toLocaleString()} (Current Price: $${currentPrice})`;
-                            }
-                        }
-
-                        // Recalculate everything
-                        recalcAllCards();
-                        updateGlobalLicenseCount();
-                        if(collectionCreated) {
-                            updateCalculations();
-                        }
-                    };
-
-                    input.onkeypress = function(e) {
-                        if (e.key === 'Enter') {
-                            this.blur();
-                        }
-                    };
-
-                    countSpan.textContent = '';
-                    countSpan.appendChild(input);
-                    input.focus();
-                });
-            }
 
             const cDef = certData.find(cd => cd.id===fishId);
             if (!cDef) return;
@@ -929,5 +877,46 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, { once: true });
             }
         }
+    });
+
+    // Add event listener for editable global sold counts
+    const globalSoldElements = document.querySelectorAll('.global-sold');
+    globalSoldElements.forEach(element => {
+        element.addEventListener('input', function() {
+            const text = this.textContent;
+            const parts = text.split('/');
+            if (parts.length === 2) {
+                const sold = parseInt(parts[0].replace(/[^0-9]/g, '')) || 0;
+                const total = parseInt(parts[1].replace(/[^0-9]/g, '')) || 0;
+                const fishId = this.parentElement.parentElement.parentElement.parentElement.id;
+
+                if (!isNaN(sold) && sold >= 0 && sold <= total) {
+                    globalMinted[fishId] = sold;
+                    recalcAllCards();
+                    updateGlobalLicenseCount();
+                } else {
+                    this.textContent = `${globalMinted[fishId] || 0} / ${total}`;
+                }
+            }
+        });
+        element.addEventListener('blur', function() {
+            const text = this.textContent;
+            const parts = text.split('/');
+            if (parts.length === 2) {
+                const sold = parseInt(parts[0].replace(/[^0-9]/g, '')) || 0;
+                const total = parseInt(parts[1].replace(/[^0-9]/g, '')) || 0;
+                const fishId = this.parentElement.parentElement.parentElement.parentElement.id;
+
+                if (!isNaN(sold) && sold >= 0 && sold <= total) {
+                    globalMinted[fishId] = sold;
+                    const currentPrice = getCurrentPriceForCert(certData.find(x => x.id === fishId), sold);
+                    this.textContent = `${sold.toLocaleString()} / ${total} (Current Price: $${currentPrice})`;
+                } else {
+                    this.textContent = `${globalMinted[fishId] || 0} / ${total}`;
+                }
+            }
+            recalcAllCards();
+            updateGlobalLicenseCount();
+        });
     });
 });
