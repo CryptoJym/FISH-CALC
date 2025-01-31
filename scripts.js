@@ -250,28 +250,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Make count number clickable and editable
                 countSpan.style.cursor = 'pointer';
-                
-                // Remove any existing click handler
-                countSpan.onclick = null;
-                
-                // Add new click handler
-                countSpan.addEventListener('click', function() {
+                countSpan.onclick = function() {
                     const input = document.createElement('input');
                     input.type = 'number';
                     input.value = count;
                     input.style.width = '100px';
                     input.style.padding = '2px';
                     input.style.fontSize = '0.9em';
-                    
-                    // Initialize with all text selected
-                    setTimeout(() => {
-                        input.select();
-                    }, 10);
-                    
-                    // Enable immediate editing
-                    input.addEventListener('mouseup', function(e) {
-                        e.preventDefault(); // Prevent deselection
-                    });
                     
                     input.onblur = function() {
                         const newCount = Math.min(Math.max(0, parseInt(this.value) || 0), cert.totalCerts);
