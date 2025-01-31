@@ -243,7 +243,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!cert) return;
 
             const count = Math.floor((val/100) * cert.totalCerts);
-            globalMinted[fishId] = count;
 
             if (labelSpan) labelSpan.textContent = val + '%';
             if (countSpan) {
@@ -251,7 +250,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Make count number clickable and editable
                 countSpan.style.cursor = 'pointer';
-                countSpan.onclick = function() {
+                
+                // Remove any existing click handler
+                countSpan.onclick = null;
+                
+                // Add new click handler
+                countSpan.addEventListener('click', function() {
                     const input = document.createElement('input');
                     input.type = 'number';
                     input.value = count;
@@ -324,15 +328,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     globalSoldEl.textContent = `${mintedCount.toLocaleString()} / ${cDef.totalCerts.toLocaleString()} (Current Price: $${currentPrice})`;
                 }
             }
-
-            // Update slider position
-            const slider = document.getElementById(`${fishId}-global-range`);
-            const percentage = (mintedCount / cDef.totalCerts) * 100;
-            if (slider) slider.value = percentage;
-
-            // Update percentage display
-            const labelSpan = document.getElementById(`${fishId}-val`);
-            if (labelSpan) labelSpan.textContent = percentage.toFixed(0) + '%';
 
             // Recompute cost & daily harvest
             recalcAllCards();
