@@ -878,29 +878,14 @@ button:hover {
 }
 
 .slider-count {
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--secondary-color);
     font-size: 0.9em;
     margin-bottom: 2px;
-    cursor: pointer;
-}
-
-.slider-count:hover {
-    color: var(--primary-color);
 }
 
 .slider-value {
     color: var(--primary-color);
     font-weight: bold;
-}
-
-.slider-count-input {
-    background: transparent;
-    border: 1px solid var(--primary-color);
-    color: var(--primary-color);
-    width: 100px;
-    padding: 2px 5px;
-    font-size: 0.9em;
-    border-radius: 3px;
 }
 
 /* Hide sections initially */

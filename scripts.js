@@ -245,35 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const count = Math.floor((val/100) * cert.totalCerts);
             
             if (labelSpan) labelSpan.textContent = val + '%';
-            if (countSpan) {
-                countSpan.textContent = `${count.toLocaleString()}/${cert.totalCerts.toLocaleString()}`;
-                countSpan.onclick = function() {
-                    const input = document.createElement('input');
-                    input.type = 'number';
-                    input.className = 'slider-count-input';
-                    input.value = count;
-                    input.max = cert.totalCerts;
-                    input.min = 0;
-                    
-                    input.onblur = function() {
-                        const newCount = Math.min(Math.max(0, parseInt(input.value) || 0), cert.totalCerts);
-                        const newPercent = Math.round((newCount / cert.totalCerts) * 100);
-                        slider.value = newPercent;
-                        countSpan.textContent = `${newCount.toLocaleString()}/${cert.totalCerts.toLocaleString()}`;
-                        globalMinted[fishId] = newCount;
-                        
-                        const labelSpan = document.getElementById(`${fishId}-val`);
-                        if (labelSpan) labelSpan.textContent = newPercent + '%';
-                        
-                        recalcAllCards();
-                        if (collectionCreated) updateCalculations();
-                    };
-                    
-                    countSpan.textContent = '';
-                    countSpan.appendChild(input);
-                    input.focus();
-                };
-            }
+            if (countSpan) countSpan.textContent = `${count.toLocaleString()}/${cert.totalCerts.toLocaleString()}`;
 
             const cDef = certData.find(cd => cd.id===fishId);
             if (!cDef) return;
