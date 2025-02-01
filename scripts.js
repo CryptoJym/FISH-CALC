@@ -5,10 +5,10 @@ async function fetchCategoryCounts() {
         "function totalSupply() view returns (uint256)",
         "function getNFTMetadata(uint256 _tokenID) view returns (tuple(address currentOwner, uint256 packageID, uint256 power, uint256 mintingPrice, uint256 mintingBonanzaRow, bool isWhale, uint256 vestingduration, string tokenIPFSURI))"
     ];
-    
+
     const provider = new ethers.providers.JsonRpcProvider("https://polygon-rpc.com");
     const nftContract = new ethers.Contract(contractAddress, nftABI, provider);
-    
+
     let counts = {
         1: 0,  // Angel‑FISH
         2: 0,  // Cod‑FISH
@@ -16,12 +16,12 @@ async function fetchCategoryCounts() {
         4: 0,  // Sword‑FISH
         5: 0   // King‑FISH
     };
-    
+
     try {
         const totalSupplyBN = await nftContract.totalSupply();
         const totalSupply = parseInt(totalSupplyBN.toString());
         console.log("Total minted tokens:", totalSupply);
-        
+
         for (let tokenId = 1; tokenId <= totalSupply; tokenId++) {
             try {
                 const metadata = await nftContract.getNFTMetadata(tokenId);
@@ -38,23 +38,57 @@ async function fetchCategoryCounts() {
     } catch (error) {
         console.error("Error fetching totalSupply():", error);
     }
-    
+
     return counts;
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // The total token pool for distributing over 10 years
+    const totalStakerPool = 5.49e9;  // e.g., 5.49B tokens (half each year, etc.)
+
+    // Phase 2 default (the year at which multiplication occurs)
+    let phase2StartYear = 5;
+
+    // Whether user has "Created Collection"
+    let collectionCreated = false;
+
+    // Currently selected token price from the radio set (defaults to 0.025 if none is checked)
+    let selectedTokenPrice = parseFloat(
+        document.querySelector('input[name="token-price"]:checked')?.value || '0.025'
+    );
+
+    // Tracking how many are minted globally (in #, not %).
+    // The range sliders let the user adjust minted % => these get converted to these numbers.
+    let globalMinted = {
+        'angel-fish': 750,    // 5% of 15000
+        'cod-fish': 625,      // 5% of 12500
+        'tuna-fish': 500,     // 5% of 10000
+        'sword-fish': 375,    // 5% of 7500
+        'king-fish': 250      // 5% of 5000
+    };
+
+    // DOM references
+    const collectionContainer = document.getElementById('cert-collection');
+    const purchaseButton = document.getElementById('purchase-button');
+    const globalLicenseCounter = document.querySelector('#global-counter .counter-value');
+    const userCollectionDiv = document.getElementById('user-collection');
+    const tokenPriceContainer = document.getElementById('token-price-container');
+    const financialProjectionsContainer = document.getElementById('financial-projections-container');
+    const graphContainer = document.getElementById('graph-container');
+    const financialProjections = document.getElementById('financial-projections');
+
     // Fetch on-chain minted counts
     try {
         const onChainCounts = await fetchCategoryCounts();
         console.log("Fetched on-chain category counts:", onChainCounts);
-        
+
         // Update the globalMinted object with on-chain values
         globalMinted['angel-fish'] = onChainCounts[1] || globalMinted['angel-fish'];
         globalMinted['cod-fish']   = onChainCounts[2] || globalMinted['cod-fish'];
         globalMinted['tuna-fish']  = onChainCounts[3] || globalMinted['tuna-fish'];
         globalMinted['sword-fish'] = onChainCounts[4] || globalMinted['sword-fish'];
         globalMinted['king-fish']  = onChainCounts[5] || globalMinted['king-fish'];
-        
+
         // Update the UI with the new minted counts
         initGlobalSoldDisplay();
     } catch (error) {
@@ -131,30 +165,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             incrementInterval: 100,
         },
     ];
-
-    // The total token pool for distributing over 10 years
-    const totalStakerPool = 5.49e9;  // e.g., 5.49B tokens (half each year, etc.)
-
-    // Phase 2 default (the year at which multiplication occurs)
-    let phase2StartYear = 5;
-
-    // Whether user has “Created Collection”
-    let collectionCreated = false;
-
-    // Currently selected token price from the radio set (defaults to 0.025 if none is checked)
-    let selectedTokenPrice = parseFloat(
-        document.querySelector('input[name="token-price"]:checked')?.value || '0.025'
-    );
-
-    // Tracking how many are minted globally (in #, not %).
-    // The range sliders let the user adjust minted % => these get converted to these numbers.
-    let globalMinted = {
-        'angel-fish': 750,    // 5% of 15000
-        'cod-fish': 625,      // 5% of 12500
-        'tuna-fish': 500,     // 5% of 10000
-        'sword-fish': 375,    // 5% of 7500
-        'king-fish': 250      // 5% of 5000
-    };
 
     // DOM references
     const collectionContainer = document.getElementById('cert-collection');
@@ -832,7 +842,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Get active fish types (ones user has selected)
         const activeFish = certData.filter(cd => {
             const card = document.getElementById(cd.id);
-            const qty = parseInt(card.querySelector('.cert-counter input').value) || 0;
+            const qty = parseInt(card.querySelector('.certcounter input').value) || 0;
             return qty > 0;
         });
 
