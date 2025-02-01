@@ -1,0 +1,82 @@
+Analysis of Your Code
+Ordering of Global Variables and On-Chain Fetch Code:
+
+In your DOMContentLoaded event, you call your blockchain fetch function (i.e. fetchCategoryCounts()) immediately at the beginning.
+However, after that call you declare your global variables (such as certData and globalMinted).
+This ordering is problematic because when the on-chain fetch code runs, the variables it tries to update (like globalMinted) aren’t defined yet. As a result, the fetched data never overwrites the default values.
+Variable Declarations Duplication:
+
+The on-chain fetch code (and the code that updates globalMinted) appears at the top of your DOMContentLoaded handler.
+Then, later in the same DOMContentLoaded block, you redeclare const certData and let globalMinted. This means any updates done by the earlier blockchain fetch are lost when these variables are redefined.
+Impact on UI:
+
+Since the UI update function initGlobalSoldDisplay() is run before the global variables are re-declared (or the updated data is overwritten), the displayed minted counts remain at the hardcoded default values.
+Updated Instructions to Fix the Issue
+To ensure the on-chain data is reflected properly, you must reorder your code so that all the global variables (like certData and globalMinted) are declared before you call the function that fetches on-chain data. Here is an updated list of explicit instructions:
+
+Move Global Variable Declarations to the Top:
+
+Inside your DOMContentLoaded event, first declare all the global settings and variables:
+Declare your certData array.
+Declare your globalMinted object with the default values.
+(Also any other global settings like totalStakerPool, phase2StartYear, etc.)
+Then Call the On-Chain Fetch Function:
+
+After the global variables are declared, call your asynchronous function fetchCategoryCounts().
+When it returns the on-chain counts, update the globalMinted object accordingly and call initGlobalSoldDisplay() to refresh the UI.
+Ensure No Duplicate Declarations:
+
+Make sure that you only declare certData and globalMinted once. Do not redeclare them after updating with on-chain data.
+Example Reordering:
+
+Your DOMContentLoaded event should roughly follow this structure:
+
+js
+Copy
+document.addEventListener('DOMContentLoaded', async () => {
+    /**************************************************************
+     * 1. CERT DATA + GLOBAL SETTINGS (Declare These FIRST)
+     **************************************************************/
+    const certData = [ ... ];  // your certData array
+    let globalMinted = {
+        'angel-fish': 750,
+        'cod-fish': 625,
+        'tuna-fish': 500,
+        'sword-fish': 375,
+        'king-fish': 250
+    };
+    const totalStakerPool = 5.49e9;
+    let phase2StartYear = 5;
+    let collectionCreated = false;
+    let selectedTokenPrice = parseFloat(document.querySelector('input[name="token-price"]:checked')?.value || '0.025');
+
+    // (Declare any other needed global variables and DOM references here)
+    const collectionContainer = document.getElementById('cert-collection');
+    const purchaseButton = document.getElementById('purchase-button');
+    const globalLicenseCounter = document.querySelector('#global-counter .counter-value');
+    const userCollectionDiv = document.getElementById('user-collection');
+    // ...and so on
+
+    /**************************************************************
+     * 2. Call On-Chain Fetch Function to Update globalMinted
+     **************************************************************/
+    try {
+        const onChainCounts = await fetchCategoryCounts();
+        console.log("Fetched on-chain category counts:", onChainCounts);
+        globalMinted['angel-fish'] = onChainCounts[1] || globalMinted['angel-fish'];
+        globalMinted['cod-fish']   = onChainCounts[2] || globalMinted['cod-fish'];
+        globalMinted['tuna-fish']  = onChainCounts[3] || globalMinted['tuna-fish'];
+        globalMinted['sword-fish'] = onChainCounts[4] || globalMinted['sword-fish'];
+        globalMinted['king-fish']  = onChainCounts[5] || globalMinted['king-fish'];
+        initGlobalSoldDisplay(); // Update UI based on new globalMinted values
+    } catch (error) {
+        console.error("Error initializing blockchain data:", error);
+    }
+
+    /**************************************************************
+     * 3. Continue With The Rest of Your Initialization Code
+     **************************************************************/
+    // Create certification cards, add event listeners, etc.
+    createCertCards();
+    // ... rest of your existing code
+});
