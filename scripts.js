@@ -42,6 +42,44 @@ async function fetchCategoryCounts() {
     return counts;
 }
 
+// --- Function to fetch on-chain minted counts from the Fish_Purchase contract ---
+async function fetchMintCountForPackage(packageId) {
+  const purchaseContractAddress = "0x43bf526abad45cfae684e706cdbec1cf52a91646";
+  const purchaseABI = [
+    "function mintCountPerPackage(uint256) view returns (uint256)"
+  ];
+  const provider = new ethers.providers.JsonRpcProvider("https://polygon-rpc.com");
+  const purchaseContract = new ethers.Contract(purchaseContractAddress, purchaseABI, provider);
+  try {
+    const countBN = await purchaseContract.mintCountPerPackage(packageId);
+    console.log("Raw count for package " + packageId + ":", countBN);
+    if (!countBN) {
+      console.warn("Received undefined count for package " + packageId);
+    } else {
+      console.log("Parsed count string for package " + packageId + ":", countBN.toString());
+    }
+    return parseInt(countBN.toString());
+  } catch (error) {
+    console.error(`Error fetching minted count for package ${packageId}:`, error);
+    return 0;
+  }
+}
+
+// Add a helper function to pause execution
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Update fetchAllMintCounts to call fetchMintCountForPackage sequentially with a delay
+async function fetchAllMintCounts() {
+  const counts = {};
+  for (let pkgId = 1; pkgId <= 5; pkgId++) {
+    counts[pkgId] = await fetchMintCountForPackage(pkgId);
+    await sleep(200); // 200ms delay between calls
+  }
+  return counts;
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     // Fetch on-chain minted counts
     try {
@@ -138,7 +176,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Phase 2 default (the year at which multiplication occurs)
     let phase2StartYear = 5;
 
-    // Whether user has “Created Collection”
+    // Whether user has "Created Collection"
     let collectionCreated = false;
 
     // Currently selected token price from the radio set (defaults to 0.025 if none is checked)
@@ -155,6 +193,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         'sword-fish': 375,    // 5% of 7500
         'king-fish': 250      // 5% of 5000
     };
+
+    // NEW: Helper function to retrieve the global minted count for a given cert id
+    function getGlobalMintedCount(certId) {
+        const count = globalMinted[certId] || 0;
+        console.log(`getGlobalMintedCount: ${certId} = ${count}`);
+        return count;
+    }
 
     // DOM references
     const collectionContainer = document.getElementById('cert-collection');
@@ -437,10 +482,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         return totalCost;
     }
 
-    function getGlobalMintedCount(fishId) {
-        return globalMinted[fishId] || 0;
-    }
-
     function getUserCost(cert, userQty) {
         const mintedCount = getGlobalMintedCount(cert.id);
         return calculateCostForQuantity(cert, userQty, mintedCount);
@@ -485,7 +526,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return { userW, globalW };
     }
 
-    // Our main function to compute user’s yearly distribution
+    // Our main function to compute user's yearly distribution
     function computeYearlyRewards() {
         const yearPool = computeYearlyPools();
         const userTotalCost = getUserTotalCostAll();
@@ -520,7 +561,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return results;
     }
 
-    // For daily calculations, we treat it as if we’re in “Year 1”
+    // For daily calculations, we treat it as if we're in "Year 1"
     // or year = 1 until phase2 triggers.
     function calcDailyRateForCert(cert) {
         const year = 1; // simple approach
@@ -720,7 +761,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     /**************************************************************
-     * 7. “Create Collection” => finalize user selection
+     * 7. "Create Collection" => finalize user selection
      **************************************************************/
     purchaseButton.addEventListener('click', () => {
         // Update collection first
