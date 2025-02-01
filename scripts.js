@@ -80,36 +80,6 @@ async function fetchAllMintCounts() {
   return counts;
 }
 
-// Global variables declaration
-const certData = [
-    {
-        id: 'angel-fish',
-        name: 'Angel-FISH',
-        imageSrc: 'assets/Angel-FISH-NBG-sml.png',
-        altText: 'Angel-FISH Icon',
-        totalCerts: 15000,
-        weightingFactor: 0.25,
-        phase2Multiplier: 2,
-        certColor: '#0AFFFF',
-        startingPriceDisplay: '$25',
-        incrementAmount: 10,
-        incrementInterval: 100,
-    },
-    // ... rest of certData array
-];
-
-// Global tracking variables
-let collectionCreated = false;
-let selectedTokenPrice = 0.025;
-let phase2StartYear = 5;
-let globalMinted = {
-    'angel-fish': 750,
-    'cod-fish': 625,
-    'tuna-fish': 500,
-    'sword-fish': 375,
-    'king-fish': 250
-};
-
 document.addEventListener('DOMContentLoaded', async () => {
     // Fetch on-chain minted counts
     try {
@@ -130,7 +100,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     /**************************************************************
-     * 1. INITIALIZE UI ELEMENTS
+     * 1. CERT DATA + GLOBAL SETTINGS
      **************************************************************/
     const certData = [
         {
