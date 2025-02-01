@@ -1,0 +1,91 @@
+Updated Integration Instructions
+Include Ethers.js in the HTML File:
+
+Open your index.html file.
+In the <head> section, before your custom scripts.js is loaded, insert:
+html
+Copy
+<script src="https://cdn.jsdelivr.net/npm/ethers/dist/ethers.umd.min.js"></script>
+Save the file. This ensures that the ethers library is available for blockchain interactions.
+Create an On-Chain Data Fetch Function in scripts.js:
+
+Open your scripts.js file.
+At the top (or in a dedicated “Blockchain Integration” section), add the following function:
+js
+Copy
+// Function to fetch on-chain minted counts per category
+async function fetchCategoryCounts() {
+  // Define the NFT contract address and minimal ABI
+  const contractAddress = "0xce12c3049DcC8498D92b03d8D4932451B4A8e577";
+  const nftABI = [
+    "function totalSupply() view returns (uint256)",
+    "function getNFTMetadata(uint256 _tokenID) view returns (tuple(address currentOwner, uint256 packageID, uint256 power, uint256 mintingPrice, uint256 mintingBonanzaRow, bool isWhale, uint256 vestingduration, string tokenIPFSURI))"
+  ];
+  
+  // Connect to the Polygon network (use a public RPC or your provider)
+  const provider = new ethers.providers.JsonRpcProvider("https://polygon-rpc.com");
+  
+  // Instantiate the NFT contract
+  const nftContract = new ethers.Contract(contractAddress, nftABI, provider);
+  
+  // Initialize counts for each packageID (1 through 5)
+  let counts = {
+    1: 0,  // Angel‑FISH
+    2: 0,  // Cod‑FISH
+    3: 0,  // Tuna‑FISH
+    4: 0,  // Sword‑FISH
+    5: 0   // King‑FISH
+  };
+  
+  try {
+    // Fetch the total number of minted tokens
+    const totalSupplyBN = await nftContract.totalSupply();
+    const totalSupply = parseInt(totalSupplyBN.toString());
+    console.log("Total minted tokens:", totalSupply);
+    
+    // Loop through token IDs 1 to totalSupply
+    for (let tokenId = 1; tokenId <= totalSupply; tokenId++) {
+      try {
+        const metadata = await nftContract.getNFTMetadata(tokenId);
+        // Convert packageID to string for consistency (or use Number(metadata.packageID))
+        const pkgId = metadata.packageID.toString();
+        if (counts[pkgId] !== undefined) {
+          counts[pkgId]++;
+        } else {
+          console.warn(`Token ${tokenId} returned an unexpected packageID: ${pkgId}`);
+        }
+      } catch (tokenError) {
+        console.error(`Error fetching metadata for token ID ${tokenId}:`, tokenError);
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching totalSupply():", error);
+  }
+  
+  return counts;
+}
+Save your changes. This function connects to the contract, loops over all token IDs, retrieves each token’s metadata, and tallies counts by packageID.
+Integrate the On-Chain Fetch into the App Initialization:
+
+In your DOMContentLoaded event listener in scripts.js, add a call to fetchCategoryCounts() and update the globalMinted object accordingly.
+For example, at the start of the event handler, insert:
+js
+Copy
+document.addEventListener('DOMContentLoaded', async () => {
+  // Fetch on-chain minted counts
+  const onChainCounts = await fetchCategoryCounts();
+  console.log("Fetched on-chain category counts:", onChainCounts);
+  
+  // Update the globalMinted object with on-chain values
+  globalMinted['angel-fish'] = onChainCounts[1] || globalMinted['angel-fish'];
+  globalMinted['cod-fish']   = onChainCounts[2] || globalMinted['cod-fish'];
+  globalMinted['tuna-fish']  = onChainCounts[3] || globalMinted['tuna-fish'];
+  globalMinted['sword-fish'] = onChainCounts[4] || globalMinted['sword-fish'];
+  globalMinted['king-fish']  = onChainCounts[5] || globalMinted['king-fish'];
+  
+  // Update the UI with the new minted counts
+  initGlobalSoldDisplay();
+  
+  // (Continue with the rest of your initialization code...)
+});
+This ensures that when the page loads, the app queries the blockchain, aggregates the minted counts per category, updates your globalMinted object, and then refreshes the UI elements accordingly.
