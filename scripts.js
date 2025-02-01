@@ -1,4 +1,66 @@
-document.addEventListener('DOMContentLoaded', () => {
+// Function to fetch on-chain minted counts per category
+async function fetchCategoryCounts() {
+    const contractAddress = "0xce12c3049DcC8498D92b03d8D4932451B4A8e577";
+    const nftABI = [
+        "function totalSupply() view returns (uint256)",
+        "function getNFTMetadata(uint256 _tokenID) view returns (tuple(address currentOwner, uint256 packageID, uint256 power, uint256 mintingPrice, uint256 mintingBonanzaRow, bool isWhale, uint256 vestingduration, string tokenIPFSURI))"
+    ];
+    
+    const provider = new ethers.providers.JsonRpcProvider("https://polygon-rpc.com");
+    const nftContract = new ethers.Contract(contractAddress, nftABI, provider);
+    
+    let counts = {
+        1: 0,  // Angel‑FISH
+        2: 0,  // Cod‑FISH
+        3: 0,  // Tuna‑FISH
+        4: 0,  // Sword‑FISH
+        5: 0   // King‑FISH
+    };
+    
+    try {
+        const totalSupplyBN = await nftContract.totalSupply();
+        const totalSupply = parseInt(totalSupplyBN.toString());
+        console.log("Total minted tokens:", totalSupply);
+        
+        for (let tokenId = 1; tokenId <= totalSupply; tokenId++) {
+            try {
+                const metadata = await nftContract.getNFTMetadata(tokenId);
+                const pkgId = metadata.packageID.toString();
+                if (counts[pkgId] !== undefined) {
+                    counts[pkgId]++;
+                } else {
+                    console.warn(`Token ${tokenId} returned an unexpected packageID: ${pkgId}`);
+                }
+            } catch (tokenError) {
+                console.error(`Error fetching metadata for token ID ${tokenId}:`, tokenError);
+            }
+        }
+    } catch (error) {
+        console.error("Error fetching totalSupply():", error);
+    }
+    
+    return counts;
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    // Fetch on-chain minted counts
+    try {
+        const onChainCounts = await fetchCategoryCounts();
+        console.log("Fetched on-chain category counts:", onChainCounts);
+        
+        // Update the globalMinted object with on-chain values
+        globalMinted['angel-fish'] = onChainCounts[1] || globalMinted['angel-fish'];
+        globalMinted['cod-fish']   = onChainCounts[2] || globalMinted['cod-fish'];
+        globalMinted['tuna-fish']  = onChainCounts[3] || globalMinted['tuna-fish'];
+        globalMinted['sword-fish'] = onChainCounts[4] || globalMinted['sword-fish'];
+        globalMinted['king-fish']  = onChainCounts[5] || globalMinted['king-fish'];
+        
+        // Update the UI with the new minted counts
+        initGlobalSoldDisplay();
+    } catch (error) {
+        console.error("Error initializing blockchain data:", error);
+    }
+
     /**************************************************************
      * 1. CERT DATA + GLOBAL SETTINGS
      **************************************************************/
