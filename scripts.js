@@ -46,11 +46,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       try {
           const onChainCounts = await fetchAllMintCounts();
           console.log("Fetched on-chain package counts:", onChainCounts);
-          globalMinted['angel-fish'] = onChainCounts[1] || globalMinted['angel-fish'];
-          globalMinted['cod-fish']   = onChainCounts[2] || globalMinted['cod-fish'];
-          globalMinted['tuna-fish']  = onChainCounts[3] || globalMinted['tuna-fish'];
-          globalMinted['sword-fish'] = onChainCounts[4] || globalMinted['sword-fish'];
-          globalMinted['king-fish']  = onChainCounts[5] || globalMinted['king-fish'];
+          globalMinted['angel-fish'] = onChainCounts[1] ?? 0;
+          globalMinted['cod-fish']   = onChainCounts[2] ?? 0;
+          globalMinted['tuna-fish']  = onChainCounts[3] ?? 0;
+          globalMinted['sword-fish'] = onChainCounts[4] ?? 0;
+          globalMinted['king-fish']  = onChainCounts[5] ?? 0;
           initGlobalSoldDisplay();
       } catch (error) {
           console.error("Error initializing on-chain mint counts:", error);
@@ -143,13 +143,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     );
 
     // Tracking how many are minted globally (in #, not %).
-    // The range sliders let the user adjust minted % => these get converted to these numbers.
+    // Initialize with zeros, will be updated with blockchain data
     let globalMinted = {
-        'angel-fish': 750,    // 5% of 15000
-        'cod-fish': 625,      // 5% of 12500
-        'tuna-fish': 500,     // 5% of 10000
-        'sword-fish': 375,    // 5% of 7500
-        'king-fish': 250      // 5% of 5000
+        'angel-fish': 0,    // Will be updated from packageId 1
+        'cod-fish': 0,      // Will be updated from packageId 2
+        'tuna-fish': 0,     // Will be updated from packageId 3
+        'sword-fish': 0,    // Will be updated from packageId 4
+        'king-fish': 0      // Will be updated from packageId 5
     };
 
     // NEW: Helper function to retrieve the global minted count for a given cert id
