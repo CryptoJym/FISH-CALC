@@ -242,7 +242,19 @@
     <div class="custom-tooltip">
     </div>
 
-    <!-- Load main application scripts -->
+    <!-- Include onboarding module for guided tour -->
+    <script src="./onboarding.js" defer></script>
+
+    <!-- Main application scripts -->
     <script src="scripts.js" defer></script>
+
+    <!-- Initialize Onboarding after DOM is ready -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        if (window.initOnboarding) {
+          window.initOnboarding();
+        }
+      });
+    </script>
 </body>
 </html>

@@ -1,0 +1,350 @@
+General Rules
+
+Below is a markdown document outlining general rules and reminders for the AI when making changes. These guidelines are designed to help avoid common pitfalls—such as missing updates in all required places—and to ensure that any modifications remain consistent with the existing code, dependencies, and documentation.
+
+---
+
+# General Guidelines for AI Code Modifications
+
+## 1. Consistency Across the Codebase
+
+- **Naming Conventions:**  
+  Ensure that any new variables, functions, or CSS classes follow the established naming conventions (e.g., `certData`, `globalMinted`, class names like `.cert-card`).
+
+- **Code Style & Architecture:**  
+  - All changes should respect the existing structure, such as the IIFE wrapper for encapsulation.  
+  - Keep the same indentation, commenting style, and formatting as the rest of the code.
+
+- **Dynamic & Static Elements:**  
+  When a change is made to a dynamic element (e.g., sliders, counters, or buttons), verify that every instance of that element—both in the HTML templates and in the JavaScript event listeners—is updated.
+
+## 2. Comprehensive Refactoring
+
+- **Full Coverage:**  
+  If you update a function or a UI component (for example, the card flip behavior), search for all occurrences where that function or component is referenced, and apply consistent changes.
+
+- **Linked Elements:**  
+  Remember that changes in one part of the code (like modifying a slider’s behavior) might require corresponding updates in associated DOM elements (e.g., tooltips, labels, or summary displays).
+
+## 3. Comments and Documentation
+
+- **Robust Comments:**  
+  - Maintain clear and concise comments that explain what each section of the code does.  
+  - When modifications are made, update the comments to reflect the new behavior or logic.
+
+- **Inline Documentation:**  
+  - Use comments to explain the purpose of functions, especially in complex areas such as the calculation logic (`getCurrentPriceForCert()`, `calculateCostForQuantity()`, etc.).  
+  - Ensure that any “Learn More” or instructional elements include a comment indicating where the detailed explanation can be found.
+
+## 4. Dependency and External Library Awareness
+
+- **Third-Party Libraries:**  
+  - **Chart.js:** Used for rendering graphs—ensure that any changes to chart options or data sources remain compatible with Chart.js.  
+  - **Ethers.js:** Used for on-chain interactions—do not alter function calls or provider configurations without verifying that the blockchain interactions continue to work as intended.
+
+- **Versioning:**  
+  Keep in mind the current versions of dependencies (e.g., ethers.js v5.7.2, Chart.js via CDN) so that modifications don’t introduce incompatibilities.
+
+## 5. Event Listeners and DOM Updates
+
+- **Centralized Listeners:**  
+  - Verify that any updates to event listener logic (such as for the plus/minus buttons, sliders, or card flip events) are applied across all relevant components.  
+  - Ensure that changes to DOM element IDs or classes are reflected in the event listener selectors.
+
+- **UI Feedback:**  
+  - When adding visual feedback (e.g., animations on button clicks), confirm that the associated CSS classes (like `.quantity-updated` or `.input-error`) are added and removed consistently.
+  - Double-check that new interactive elements (e.g., a “Back” button on card details) are properly hooked into the existing event-handling logic.
+
+## 6. Mobile and Performance Considerations
+
+- **Touch-Friendly Design:**  
+  Confirm that interactive elements (buttons, sliders, etc.) maintain a minimum touch target size (e.g., 48x48 pixels) and that spacing is adequate on smaller screens.
+
+- **Optimized Updates:**  
+  - Use debouncing techniques for high-frequency updates (such as slider inputs) to reduce unnecessary DOM reflows.
+  - Consider using `requestAnimationFrame` for smoother animations on lower-end devices.
+
+## 7. Error Handling and Notifications
+
+- **Robust Error Checks:**  
+  - Include input validation and immediate visual feedback for out-of-range or invalid values.
+  - Use toast notifications (via a function like `showToast(message, type)`) to inform users about successful actions or errors, and ensure that these notifications are updated consistently.
+
+## 8. Testing and Integration
+
+- **Comprehensive Testing:**  
+  After any changes, simulate typical user interactions to verify that all features (onboarding, dynamic calculations, UI updates, and external API calls) continue to function as expected.
+
+- **Modular Updates:**  
+  Ensure that new modules (like an onboarding guide) are integrated without disrupting existing functionality. Keep these updates modular and separate from the core business logic.
+
+---
+
+By following these general rules, the AI will have a clear framework for making consistent, thorough, and well-documented updates. This minimizes the risk of overlooking necessary changes and ensures that every part of the code—including dependencies, event listeners, and dynamic elements—is correctly modified and maintained.
+
+
+---
+
+# Fish Rewards Simulator UX Improvement Guide
+
+This guide outlines actionable UX improvements for the Fish Rewards Simulator. It maps each improvement to your current code structure and details how the AI can automatically apply these enhancements.
+
+---
+
+## 1. Overview of the Current Code Structure
+
+- **IIFE Wrapper:**  
+  All functionality is encapsulated within an immediately invoked function expression to limit the global scope.
+
+- **Global Declarations:**  
+  Data for each CERT (e.g., `certData`, `globalMinted`) is declared at the top. Live on-chain data is fetched and then used to update the UI.
+
+- **DOM Generation & Event Listeners:**  
+  - The `createCertCards()` function dynamically builds certification cards.
+  - Event listeners are attached for user interactions (plus/minus buttons, slider input, purchase actions) that update quantities and recalculate metrics.
+
+- **Business Logic:**  
+  Functions such as `getCurrentPriceForCert()`, `calculateCostForQuantity()`, and `recalcAllCards()` compute dynamic values.
+
+- **Chart & Projections:**  
+  The simulator uses Chart.js to render interactive graphs and builds projection tables dynamically.
+
+- **CSS & HTML:**  
+  The styles define a futuristic, dark theme with animated elements and responsive behavior.
+
+---
+
+## 2. UX Improvement Objectives
+
+### A. Guided Onboarding & Instructional Clarity
+
+- **Guided Tour Overlay:**
+  - **Objective:** Provide a step-by-step walkthrough for new users covering:
+    - Token price selection (`id="token-price-section"`)
+    - Slider controls in “Step 2: Set CERT Number Sold”
+    - Certification cards in “Step 3: Select Your FISH CERTs”
+  - **Implementation:**
+    - Create a function `initOnboarding()` that injects a modal overlay with instructions.
+    - Add “Next” and “Skip” buttons that are keyboard accessible.
+
+- **Inline Tooltips and “Learn More” Links:**
+  - **Objective:** Offer plain-language explanations for technical terms (e.g., “Weighting Factor”, “Phase2 x”).
+  - **Implementation:**
+    - Modify the HTML template in `createCertCards()` to include a “Learn More” link or icon.
+    - Add an event listener on these elements to open a modal or tooltip with detailed explanations.
+
+### B. Interactive Controls and Real-Time Feedback
+
+- **Enhanced Sliders for Global Minted Counts:**
+  - **Objective:** Display a tooltip near the slider thumb showing the computed minted count and current price.
+  - **Implementation:**
+    - Update the slider event listener (on elements with `.slider-group input[type="range"]`) to call a new function `updateSliderTooltip(slider, count, price)`.
+    - Use lightweight CSS/JS animations for a smooth real-time display.
+
+- **Plus/Minus Button Feedback:**
+  - **Objective:** Provide immediate visual feedback on quantity updates.
+  - **Implementation:**
+    - Enhance the event listeners for plus/minus buttons to add a temporary CSS class (e.g., `.quantity-updated`) triggering a subtle animation.
+    - Update the CSS for `.counter-button:hover` to include a scaling or color change effect.
+
+### C. Improving Card Flipping and Detail Views
+
+- **Refine Flip Animation:**
+  - **Objective:** Make the transition between the front (overview) and back (details) of each card smoother.
+  - **Implementation:**
+    - Adjust the CSS transition duration for `.cert-inner` (e.g., increase from 0.3s to 0.5s).
+    - Add a “Back” button within the card detail view (inside `.cert-back`) that, when clicked, removes the `flipped` class.
+
+### D. Consistency, Accessibility, and Error Handling
+
+- **ARIA and Semantic Markup:**
+  - **Objective:** Ensure all interactive elements are accessible.
+  - **Implementation:**
+    - Inject ARIA attributes (e.g., `role="button"`, `aria-label`, and `tabindex`) into the HTML templates and dynamically generated content.
+
+- **Input Validation & Feedback:**
+  - **Objective:** Validate user inputs (e.g., slider counts, cert quantities) and provide immediate error feedback.
+  - **Implementation:**
+    - Enhance the `onblur` handlers in inputs to check if the value is within valid bounds.
+    - If out-of-range, add a visual cue (e.g., a red outline) and optionally display a brief error message.
+
+- **Toast Notifications:**
+  - **Objective:** Notify users when major actions occur (e.g., successful collection creation or errors during data fetch).
+  - **Implementation:**
+    - Develop a function `showToast(message, type)` that creates and auto-removes notification elements.
+    - Call `showToast()` from within relevant event handlers (e.g., after a successful purchase or in the `catch` block of fetch calls).
+
+### E. Mobile and Performance Optimizations
+
+- **Touch-Friendly Interactions:**
+  - **Objective:** Ensure all interactive elements (sliders, buttons) are optimized for touch on mobile devices.
+  - **Implementation:**
+    - Verify that touch areas are at least 48x48 pixels.
+    - Adjust spacing between elements using media queries to maintain usability on smaller screens.
+
+- **Efficient Re-Rendering:**
+  - **Objective:** Optimize frequent updates (e.g., slider inputs) to avoid excessive DOM updates.
+  - **Implementation:**
+    - Wrap high-frequency update functions (e.g., `recalcAllCards()`) with a debounce function.
+    - Consider using `requestAnimationFrame` for smoother animations on lower-end devices.
+
+---
+
+## 3. Mapping Improvements to the Current Code Structure
+
+### A. Enhancing Onboarding & Instructional Clarity
+
+- **Inject Onboarding Module:**
+  - Create a new module (e.g., `onboarding.js`) with a function `initOnboarding()`.
+  - On `DOMContentLoaded`, call `initOnboarding()` to insert an overlay that highlights:
+    - The token price section (`#token-price-section`)
+    - The slider controls for global minted counts
+    - The certification cards in `#cert-collection`
+  - Include “Next” and “Skip” buttons in the overlay.
+
+- **Inline Tooltips:**
+  - In `createCertCards()`, add elements such as:
+    ```html
+    <span class="label">
+      Weight Factor
+      <a href="#" class="learn-more" data-term="weightingFactor">Learn More</a>
+    </span>
+    ```
+  - Add event listeners to `.learn-more` elements to display detailed explanations.
+
+### B. Enhancing Interactive Controls
+
+- **Slider Tooltip Functionality:**
+  - Modify the slider input event handler to call a new function:
+    ```js
+    function updateSliderTooltip(slider, count, price) {
+      // Compute tooltip position and content based on 'count' and 'price'
+      // Update the tooltip display accordingly.
+    }
+    ```
+  - Integrate this function inside the slider's `input` event handler.
+
+- **Visual Feedback for Buttons:**
+  - In the plus/minus button event handlers (inside the collection container listener), add a class such as `.quantity-updated` to the card.
+  - Update CSS to animate this class:
+    ```css
+    .quantity-updated {
+      animation: pulse 0.5s ease;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    ```
+
+### C. Improving Card Flipping & Detail Views
+
+- **Refine Flip Animation:**
+  - Update the CSS transition:
+    ```css
+    .cert-inner {
+      transition: transform 0.5s ease;
+    }
+    ```
+  - Insert a “Back” button in the HTML template inside `.cert-back`:
+    ```html
+    <button class="back-button" aria-label="Go Back">Back</button>
+    ```
+  - Add an event listener for `.back-button` to remove the `flipped` class.
+
+### D. Consistency, Accessibility, and Error Handling
+
+- **ARIA and Semantic Enhancements:**
+  - Update dynamic HTML in `createCertCards()` and other functions to include:
+    ```html
+    <button class="plus-button" role="button" aria-label="Increase quantity">+</button>
+    <button class="minus-button" role="button" aria-label="Decrease quantity">-</button>
+    ```
+  - Ensure all interactive elements have proper `tabindex` and ARIA attributes.
+
+- **Input Validation:**
+  - Enhance the `onblur` event in slider count inputs:
+    ```js
+    input.onblur = function () {
+      const newCount = Math.min(Math.max(0, parseInt(this.value) || 0), cert.totalCerts);
+      if (newCount < 0 || newCount > cert.totalCerts) {
+        this.classList.add('input-error');
+        setTimeout(() => this.classList.remove('input-error'), 2000);
+      }
+      // Continue with updating the display
+    };
+    ```
+- **Toast Notifications:**
+  - Create a function:
+    ```js
+    function showToast(message, type) {
+      // Create a temporary notification element
+      // Append it to the DOM and remove it after a set time
+    }
+    ```
+  - Call `showToast()` in key actions (e.g., after collection creation, error catch blocks).
+
+### E. Mobile and Performance Optimizations
+
+- **Touch-Friendly Adjustments:**
+  - Review the CSS for interactive elements (buttons, sliders) ensuring minimum sizes and sufficient spacing.
+  - Use media queries to adjust the layout on small screens.
+
+- **Debounce High-Frequency Updates:**
+  - Wrap frequent update functions:
+    ```js
+    function debounce(func, wait) {
+      let timeout;
+      return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+      };
+    }
+    const debouncedRecalc = debounce(recalcAllCards, 100);
+    // Use debouncedRecalc() in place of direct calls during rapid events.
+    ```
+
+---
+
+## 4. Implementation Steps for the AI on Cursor Using O3 Mini
+
+1. **Parse the Existing Code:**
+   - Identify key functions (`createCertCards()`, event listeners, UI update functions like `recalcAllCards()`).
+
+2. **Inject Onboarding Module:**
+   - Create and include `onboarding.js` with an `initOnboarding()` function.
+   - On `DOMContentLoaded`, insert the overlay and guide users through the three steps.
+
+3. **Enhance Interactive Elements:**
+   - Modify slider event listeners to call `updateSliderTooltip(slider, count, price)`.
+   - Update plus/minus button handlers to include visual feedback.
+   - Insert a “Back” button in the card details view and attach an event listener to remove the `flipped` class.
+
+4. **Integrate Accessibility Attributes:**
+   - Add ARIA roles, labels, and tabindex attributes into all dynamically generated content.
+   - Ensure focus management is correctly handled after actions such as card flips.
+
+5. **Implement Error and Toast Notifications:**
+   - Create a lightweight toast notification function (`showToast(message, type)`).
+   - Call the function in appropriate places (e.g., after a successful collection creation or when errors occur).
+
+6. **Optimize for Performance and Mobile:**
+   - Test new UI elements on simulated low-end devices.
+   - Wrap high-frequency updates with a debounce function to reduce unnecessary DOM reflows.
+   - Use `requestAnimationFrame` where applicable for smoother animations.
+
+7. **Testing and Iteration:**
+   - Enable logging or analytics to track user interactions.
+   - Optionally, implement A/B testing to compare the enhanced UX against the original, then refine based on collected data.
+
+---
+
+## 5. Conclusion
+
+By following this guide, the AI can systematically enhance the UX of the Fish Rewards Simulator. The improvements—from onboarding and tooltips to interactive controls and accessibility enhancements—are designed to make the simulator more engaging and user-friendly. The AI can use these instructions to inject new DOM elements, adjust event listeners, and ensure that all changes are optimized for performance (especially on platforms like Cursor using O3 Mini).
+
+These refinements will lead to a smoother, more intuitive user experience, ultimately increasing engagement and satisfaction without compromising on the underlying functionality.
+
+--- 
+
