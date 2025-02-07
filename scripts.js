@@ -360,7 +360,7 @@ async function fetchAllMintCounts() {
                                    <span class="value user-qty">0</span>
                                 </p>
               <p>
-                <span class="label">Your Investment:</span>
+                <span class="label">Your Purchase:</span>
                                    <span class="value total-cost-value">$0</span>
                                 </p>
                             </div>
