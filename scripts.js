@@ -802,15 +802,38 @@ function getUserTotalCostAll() {
         });
     });
 
+// Get the manual price input element
+const manualPriceInput = document.getElementById('manual-token-price');
+
 const priceOpts = document.getElementsByName('token-price');
 priceOpts.forEach(opt => {
   opt.addEventListener('change', () => {
     selectedTokenPrice = parseFloat(opt.value);
+    // Clear manual price input if a radio option is selected
+    if (manualPriceInput) {
+      manualPriceInput.value = "";
+    }
     recalcAllCards();
-    updateGlobalLicenseCount(); // Add this to update summary bar
+    updateGlobalLicenseCount();
     if (collectionCreated) updateCalculations();
   });
 });
+
+// Add event listener for manual price input
+if (manualPriceInput) {
+  manualPriceInput.addEventListener('input', (e) => {
+    const newVal = parseFloat(e.target.value);
+    if (!isNaN(newVal) && newVal > 0) {
+      selectedTokenPrice = newVal;
+      // Clear the radio selection so manual takes precedence
+      const priceRadios = document.getElementsByName('token-price');
+      priceRadios.forEach(radio => radio.checked = false);
+      recalcAllCards();
+      updateGlobalLicenseCount();
+      if (collectionCreated) updateCalculations();
+    }
+  });
+}
 
 const graphToggleBtns = document.querySelectorAll('.graph-toggle-button');
     let chartInstance;
@@ -958,7 +981,7 @@ graphToggleBtns.forEach(btn => {
   const tokenRow = document.createElement('tr');
   tokenRow.innerHTML = `
     <td>User Tokens <span class="info-icon" data-tooltip="This is how many FISH tokens you'll harvest in that year.">i</span></td>
-    ${yearlyData.map(d => `<td>${d.userTokens.toFixed(2)}</td>`).join('')}
+    ${yearlyData.map(d => `<td>${d.userTokens.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>`).join('')}
   `;
   tbody.appendChild(tokenRow);
 
@@ -966,7 +989,7 @@ graphToggleBtns.forEach(btn => {
   const cumTokenRow = document.createElement('tr');
   cumTokenRow.innerHTML = `
     <td>Cumulative Tokens <span class="info-icon" data-tooltip="Total FISH tokens from start to that year.">i</span></td>
-    ${yearlyData.map(d => `<td>${d.cumTokens.toFixed(2)}</td>`).join('')}
+    ${yearlyData.map(d => `<td>${d.cumTokens.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>`).join('')}
   `;
   tbody.appendChild(cumTokenRow);
 
@@ -974,7 +997,7 @@ graphToggleBtns.forEach(btn => {
   const yearValueRow = document.createElement('tr');
   yearValueRow.innerHTML = `
     <td>Year Value (USD)</td>
-    ${yearlyData.map(d => `<td>$${d.yearValue.toFixed(2)}</td>`).join('')}
+    ${yearlyData.map(d => `<td>$${d.yearValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>`).join('')}
   `;
   tbody.appendChild(yearValueRow);
 
@@ -982,7 +1005,7 @@ graphToggleBtns.forEach(btn => {
   const cumValueRow = document.createElement('tr');
   cumValueRow.innerHTML = `
     <td>Cumulative Value (USD)</td>
-    ${yearlyData.map(d => `<td>$${d.cumValue.toFixed(2)}</td>`).join('')}
+    ${yearlyData.map(d => `<td>$${d.cumValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>`).join('')}
   `;
   tbody.appendChild(cumValueRow);
 
@@ -990,7 +1013,7 @@ graphToggleBtns.forEach(btn => {
   const corRow = document.createElement('tr');
   corRow.innerHTML = `
     <td>COR (%) <span class="info-icon" data-tooltip="Cumulative % Return on your original cost. If this is over 100%, you're effectively beyond breakeven.">i</span></td>
-    ${yearlyData.map(d => `<td>${d.cor.toFixed(2)}%</td>`).join('')}
+    ${yearlyData.map(d => `<td>${d.cor.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}%</td>`).join('')}
   `;
   tbody.appendChild(corRow);
 
