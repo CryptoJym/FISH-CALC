@@ -195,6 +195,38 @@
                 Review the <strong>annual breakdown</strong> of how many tokens you may collect, 
                 plus the potential USD value and ROI if token prices remain constant.
             </p>
+            
+            <!-- Price Selection -->
+            <div class="projection-price-section" style="margin: 20px auto; padding: 20px; background: rgba(0, 51, 102, 0.4); border-radius: 10px; max-width: 800px;">
+                <h3 style="color: #00FFFF; margin-bottom: 15px;">Token Price Selection</h3>
+                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
+                    <div class="token-price-option">
+                        <input type="radio" id="price1-proj" name="token-price" value="0.0025">
+                        <label for="price1-proj">$0.0025/FISH</label>
+                    </div>
+                    <div class="token-price-option">
+                        <input type="radio" id="price2-proj" name="token-price" value="0.025">
+                        <label for="price2-proj">$0.025/FISH</label>
+                    </div>
+                    <div class="token-price-option">
+                        <input type="radio" id="price3-proj" name="token-price" value="0.25">
+                        <label for="price3-proj">$0.25/FISH</label>
+                    </div>
+                    <div class="token-price-option">
+                        <input type="radio" id="price4-proj" name="token-price" value="0.5">
+                        <label for="price4-proj">$0.50/FISH</label>
+                    </div>
+                    <div class="token-price-option">
+                        <input type="radio" id="price5-proj" name="token-price" value="1.25">
+                        <label for="price5-proj">$1.25/FISH</label>
+                    </div>
+                </div>
+                <div class="token-price-manual" style="margin-top:15px;">
+                    <label for="manual-token-price-proj" style="font-weight:bold; margin-right:10px;">Or enter a custom price ($/FISH):</label>
+                    <input type="number" id="manual-token-price-proj" placeholder="Custom price" step="any" min="0">
+                </div>
+            </div>
+            
             <div id="financial-projections"></div>
         </div>
 
