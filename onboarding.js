@@ -177,6 +177,8 @@
         });
         // Mark the tour as complete so it doesn't show again on subsequent visits
         localStorage.setItem('onboardingComplete', 'true');
+        // Scroll to top of page
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     });
 
