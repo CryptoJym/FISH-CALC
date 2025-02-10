@@ -184,7 +184,22 @@
     updateStep();
   }
 
-  // Expose the initOnboarding function to the global scope
+  // Function to handle tour restart
+  function restartTour() {
+    localStorage.removeItem('onboardingComplete');
+    initOnboarding();
+  }
+
+  // Expose the functions to the global scope
   window.initOnboarding = initOnboarding;
+  window.restartTour = restartTour;
+
+  // Add event listener for restart button when DOM is loaded
+  document.addEventListener('DOMContentLoaded', function() {
+    const restartButton = document.getElementById('restart-tour');
+    if (restartButton) {
+      restartButton.addEventListener('click', restartTour);
+    }
+  });
 
 })(); 
