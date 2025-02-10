@@ -224,7 +224,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const card = input.closest('.cert-card');
       if (card) {
         const newVal = parseInt(input.value) || 0;
-        setCardQty(card, newVal);
+        setCardQuantity(card, newVal);
       }
     }
   });
@@ -831,7 +831,7 @@ function recalcAllCards() {
     const dailyUSD = dailyRate * selectedTokenPrice;
     let beDays = '--';
     if (dailyUSD > 0) {
-      beDays = Math.ceil(cost / dailyUSD) + ' days';
+      beDays = Mathceil(cost / dailyUSD) + ' days';
     }
     card.querySelector('.break-even').textContent = beDays;
   });
