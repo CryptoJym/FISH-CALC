@@ -785,10 +785,9 @@ function updateGlobalLicenseCount() {
     }
 
     // Get daily rate for rewards calculation
-    const dailyRateEl = card.querySelector('.current-harvest');
-    if (dailyRateEl) {
-      const rateText = dailyRateEl.textContent;
-      const dailyTokens = parseFloat(rateText.split(' ')[0]) || 0;
+    const cDef = certData.find(cd => cd.id === card.id);
+    if (cDef) {
+      const dailyTokens = calcDailyRateForCert(cDef);
       totalDailyRewards += (dailyTokens * selectedTokenPrice);
     }
 
