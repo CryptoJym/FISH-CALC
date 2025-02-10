@@ -152,6 +152,15 @@
           element.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
       }
+
+      // Update buttons for the final step
+      if (currentStep === steps.length - 1) {
+        skipBtn.style.display = 'none';
+        nextBtn.textContent = 'Try Simulator Now';
+      } else {
+        skipBtn.style.display = 'block';
+        nextBtn.textContent = 'Next';
+      }
     }
 
     // Event listener for the Next button
