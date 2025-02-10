@@ -160,6 +160,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     initGlobalSoldDisplay();
   }
 
+  // Inserted in DOMContentLoaded after initGlobalSoldDisplay() call
+  if (!window.initialMintedCounts) {
+    window.initialMintedCounts = Object.assign({}, globalMinted);
+  }
+
+  var gmContainer = document.getElementById('global-minted-controls');
+  if (gmContainer) {
+    var resetButton = document.createElement('button');
+    resetButton.id = 'reset-global-minted';
+    resetButton.textContent = 'Reset to Live Data';
+    resetButton.style.padding = '10px 20px';
+    resetButton.style.border = '2px solid #00FFFF';
+    resetButton.style.borderRadius = '5px';
+    resetButton.style.backgroundColor = 'transparent';
+    resetButton.style.color = '#00FFFF';
+    resetButton.style.marginLeft = '10px';
+    resetButton.addEventListener('click', () => {
+      globalMinted = Object.assign({}, window.initialMintedCounts);
+      initGlobalSoldDisplay();
+      recalcAllCards();
+      updateGlobalLicenseCount();
+    });
+    gmContainer.appendChild(resetButton);
+  }
+
   // Remove duplicate declarations of certData and globalMinted that were here before (if any)
 
   // ... (rest of your initialization and event listener setup remains unchanged) ...
@@ -250,6 +275,74 @@ document.addEventListener('DOMContentLoaded', async () => {
   // --- End CARD INTERACTIVITY ---
 
   // ... (rest of your DOMContentLoaded initialization remains unchanged) ...
+
+  // Attach click event for manual editing to all slider count elements (for all tiers) on DOMContentLoaded
+  document.querySelectorAll('.slider-count').forEach(function(countSpan) {
+    var fishId = countSpan.id.replace('-count', '');
+    var slider = document.getElementById(fishId + '-global-range');
+    if (slider) {
+      countSpan.style.cursor = 'pointer';
+      countSpan.onclick = function(e) {
+        // Prevent multiple inputs
+        if (e.target.tagName === 'INPUT') return;
+        var cert = certData.find(c => c.id === fishId);
+        if (!cert) return;
+        var currentVal = parseInt(slider.value);
+        var currCount = Math.floor((currentVal / 100) * cert.totalCerts);
+        var input = document.createElement('input');
+        input.type = 'number';
+        input.value = currCount;
+        input.className = 'slider-count-input';
+        input.min = 0;
+        input.max = cert.totalCerts;
+
+        input.onfocus = function() { this.select(); };
+
+        input.onkeydown = function(e) {
+          if (e.key === 'Enter') {
+            this.blur();
+          } else if (e.key === 'Escape') {
+            this.value = currCount;
+            this.blur();
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            this.value = Math.min(parseInt(this.value) + 1, cert.totalCerts);
+          } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            this.value = Math.max(parseInt(this.value) - 1, 0);
+          }
+        };
+
+        input.onblur = function() {
+          var newCount = Math.min(Math.max(0, parseInt(this.value) || 0), cert.totalCerts);
+          var newPercentage = (newCount / cert.totalCerts) * 100;
+          slider.value = newPercentage;
+
+          var labelSpan = document.getElementById(fishId + '-val');
+          if (labelSpan) {
+            labelSpan.textContent = newPercentage.toFixed(0) + '%';
+          }
+          countSpan.textContent = newCount.toLocaleString() + '/' + cert.totalCerts.toLocaleString();
+          globalMinted[fishId] = newCount;
+
+          var card = document.getElementById(fishId);
+          if (card) {
+            var globalSoldEl = card.querySelector('.global-sold');
+            if (globalSoldEl) {
+              var currentPrice = getCurrentPriceForCert(cert, newCount);
+              globalSoldEl.textContent = newCount.toLocaleString() + ' / ' + cert.totalCerts.toLocaleString() + ' (Current Price: $' + currentPrice + ')';
+            }
+          }
+          recalcAllCards();
+          if (collectionCreated) updateCalculations();
+        };
+
+        countSpan.textContent = '';
+        countSpan.appendChild(input);
+        input.focus();
+      };
+    }
+  });
 });
 
 // --- Function to fetch on-chain minted counts from the Fish_Purchase contract ---
@@ -405,6 +498,19 @@ initGlobalSoldDisplay();
  **************************************************************/
 const mintedSliders = document.querySelectorAll('.slider-group input[type="range"]');
 mintedSliders.forEach(slider => {
+  slider.addEventListener('pointerdown', function(e) {
+    var rect = slider.getBoundingClientRect();
+    var min = slider.min ? parseFloat(slider.min) : 0;
+    var max = slider.max ? parseFloat(slider.max) : 100;
+    var value = slider.value ? parseFloat(slider.value) : 0;
+    var ratio = (value - min) / (max - min);
+    var thumbX = rect.left + ratio * rect.width;
+    var threshold = 30; // allowed distance in pixels for intentional interaction
+    if (Math.abs(e.clientX - thumbX) > threshold) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  });
   slider.addEventListener('input', e => {
     const val = parseInt(e.target.value);
     const fishId = slider.id.replace('-global-range', '');
@@ -705,7 +811,7 @@ function updateGlobalLicenseCount() {
   const summaryBep = document.getElementById('summary-bep');
 
   if (summaryCerts) summaryCerts.textContent = sum.toLocaleString();
-  if (summaryDaily) summaryDaily.textContent = '$' + totalDailyRewards.toFixed(2);
+  if (summaryDaily) summaryDaily.textContent = '$' + Math.round(totalDailyRewards).toLocaleString();
   if (summaryBep) summaryBep.textContent = longestBreakEven > 0 ? longestBreakEven + ' days' : '-- days';
 }
 
@@ -720,7 +826,7 @@ function recalcAllCards() {
     card.querySelector('.total-cost-value').textContent = '$' + cost.toLocaleString();
 
     const dailyRate = calcDailyRateForCert(cDef);
-    card.querySelector('.current-harvest').textContent = dailyRate.toFixed(2) + ' tokens/day';
+    card.querySelector('.current-harvest').textContent = Math.round(dailyRate).toLocaleString() + ' tokens/day';
     card.querySelector('.year1-tokens').textContent = Math.round(dailyRate * 365).toLocaleString() + ' tokens';
 
     const dailyUSD = dailyRate * selectedTokenPrice;
@@ -981,7 +1087,7 @@ graphToggleBtns.forEach(btn => {
   const tokenRow = document.createElement('tr');
   tokenRow.innerHTML = `
     <td>User Tokens <span class="info-icon" data-tooltip="This is how many FISH tokens you'll harvest in that year.">i</span></td>
-    ${yearlyData.map(d => `<td>${d.userTokens.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>`).join('')}
+    ${yearlyData.map(d => `<td>${Math.round(d.userTokens).toLocaleString()}</td>`).join('')}
   `;
   tbody.appendChild(tokenRow);
 
@@ -989,7 +1095,7 @@ graphToggleBtns.forEach(btn => {
   const cumTokenRow = document.createElement('tr');
   cumTokenRow.innerHTML = `
     <td>Cumulative Tokens <span class="info-icon" data-tooltip="Total FISH tokens from start to that year.">i</span></td>
-    ${yearlyData.map(d => `<td>${d.cumTokens.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>`).join('')}
+    ${yearlyData.map(d => `<td>${Math.round(d.cumTokens).toLocaleString()}</td>`).join('')}
   `;
   tbody.appendChild(cumTokenRow);
 
@@ -997,7 +1103,7 @@ graphToggleBtns.forEach(btn => {
   const yearValueRow = document.createElement('tr');
   yearValueRow.innerHTML = `
     <td>Year Value (USD)</td>
-    ${yearlyData.map(d => `<td>$${d.yearValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>`).join('')}
+    ${yearlyData.map(d => `<td>$${Math.round(d.yearValue).toLocaleString()}</td>`).join('')}
   `;
   tbody.appendChild(yearValueRow);
 
@@ -1005,7 +1111,7 @@ graphToggleBtns.forEach(btn => {
   const cumValueRow = document.createElement('tr');
   cumValueRow.innerHTML = `
     <td>Cumulative Value (USD)</td>
-    ${yearlyData.map(d => `<td>$${d.cumValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>`).join('')}
+    ${yearlyData.map(d => `<td>$${Math.round(d.cumValue).toLocaleString()}</td>`).join('')}
   `;
   tbody.appendChild(cumValueRow);
 
@@ -1013,7 +1119,7 @@ graphToggleBtns.forEach(btn => {
   const corRow = document.createElement('tr');
   corRow.innerHTML = `
     <td>COR (%) <span class="info-icon" data-tooltip="Cumulative % Return on your original cost. If this is over 100%, you're effectively beyond breakeven.">i</span></td>
-    ${yearlyData.map(d => `<td>${d.cor.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}%</td>`).join('')}
+    ${yearlyData.map(d => `<td>${Math.round(d.cor).toLocaleString()}%</td>`).join('')}
   `;
   tbody.appendChild(corRow);
 

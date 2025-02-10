@@ -1165,3 +1165,12 @@ button:hover {
   font-weight: bold;
   text-align: center;
 }
+
+/* Styles for Reset Button */
+#reset-global-minted {
+    margin-top: 10px;
+    display: inline-block;
+    cursor: pointer;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1rem;
+}
