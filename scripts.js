@@ -831,7 +831,7 @@ function recalcAllCards() {
     const dailyUSD = dailyRate * selectedTokenPrice;
     let beDays = '--';
     if (dailyUSD > 0) {
-      beDays = Mathceil(cost / dailyUSD) + ' days';
+      beDays = Math.ceil(cost / dailyUSD) + ' days';
     }
     card.querySelector('.break-even').textContent = beDays;
   });
