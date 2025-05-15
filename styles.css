@@ -283,6 +283,11 @@ h2 {
     max-height: 100%;
     object-fit: contain;
     border-radius: 5px;
+    /* Soft-edge fade */
+    -webkit-mask-image: radial-gradient(ellipse at center, white 70%, transparent 100%);
+    mask-image: radial-gradient(ellipse at center, white 70%, transparent 100%);
+    -webkit-mask-size: cover;
+    mask-size: cover;
     animation: floating 3s ease-in-out infinite;
     loading: lazy;
     backface-visibility: hidden;

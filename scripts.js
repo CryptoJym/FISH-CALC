@@ -10,22 +10,9 @@
 
     const certData = [
         {
-            id: 'angel-fish',
-            name: 'Angel-FISH',
-    imageSrc: 'assets/Angel-FISH-NBG-sml.png',
-            altText: 'Angel-FISH Icon',
-    totalCerts: 15000,
-            weightingFactor: 0.25,
-            phase2Multiplier: 2,
-            certColor: '#0AFFFF',
-            startingPriceDisplay: '$25',
-            incrementAmount: 10,
-            incrementInterval: 100,
-        },
-        {
             id: 'cod-fish',
             name: 'Cod-FISH',
-    imageSrc: 'assets/Cod-FISH-NBG-sml.png',
+    imageSrc: 'assets/COD FISH CERT V1.svg',
             altText: 'Cod-FISH Icon',
             totalCerts: 12500,
             weightingFactor: 0.50,
@@ -38,7 +25,7 @@
         {
             id: 'tuna-fish',
             name: 'Tuna-FISH',
-    imageSrc: 'assets/Tuna-FISH-NBG-sml.png',
+    imageSrc: 'assets/TUNA FISH V1.svg',
             altText: 'Tuna-FISH Icon',
             totalCerts: 10000,
             weightingFactor: 0.75,
@@ -51,7 +38,7 @@
         {
             id: 'sword-fish',
             name: 'Sword-FISH',
-    imageSrc: 'assets/Sword-FISH-NBG-sml.png',
+    imageSrc: 'assets/SWORD FISH CERT V1.svg',
             altText: 'Sword-FISH Icon',
             totalCerts: 7500,
             weightingFactor: 1.00,
@@ -64,7 +51,7 @@
         {
             id: 'king-fish',
             name: 'King-FISH',
-    imageSrc: 'assets/King-FISH-NBG-sml.png',
+    imageSrc: 'assets/KING FISH V1.svg',
             altText: 'King-FISH Icon',
             totalCerts: 5000,
             weightingFactor: 1.25,
@@ -73,16 +60,57 @@
     startingPriceDisplay: '$1000',
     incrementAmount: 100,
             incrementInterval: 100,
-  }
-];
+  },
+        {
+            id: 'opah-fish',
+            name: 'Opah-FISH',
+            imageSrc: 'assets/OPAH FISH.png',
+            altText: 'Opah-FISH Icon',
+            totalCerts: 2500,
+            weightingFactor: 1.50,
+            phase2Multiplier: 6,
+            certColor: '#FF7F50',
+            startingPriceDisplay: '$2000',
+            incrementAmount: 200,
+            incrementInterval: 100,
+        },
+        {
+            id: 'sail-fish',
+            name: 'Sail-FISH',
+            imageSrc: 'assets/SAIL-FISH.png',
+            altText: 'Sail-FISH Icon',
+            totalCerts: 1250,
+            weightingFactor: 1.75,
+            phase2Multiplier: 7,
+            certColor: '#1E90FF',
+            startingPriceDisplay: '$5000',
+            incrementAmount: 500,
+            incrementInterval: 100,
+        },
+        {
+            id: 'lion-fish',
+            name: 'Lion-FISH',
+            imageSrc: 'assets/LION-FISH.png',
+            altText: 'Lion-FISH Icon',
+            totalCerts: 650,
+            weightingFactor: 2.00,
+            phase2Multiplier: 8,
+            certColor: '#FFBF00',
+            startingPriceDisplay: '$10000',
+            incrementAmount: 1000,
+            incrementInterval: 100,
+        }
+    ];
 
 // Global minted counts will be updated with live on-chain data
 let globalMinted = {
-  'angel-fish': 0,
   'cod-fish': 0,
   'tuna-fish': 0,
   'sword-fish': 0,
-  'king-fish': 0
+  'king-fish': 0,
+  'opah-fish': 0,
+  'sail-fish': 0,
+  'lion-fish': 0
 };
 
 window.getGlobalMintedCount = function(certId) {
@@ -148,11 +176,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       const onChainCounts = await fetchAllMintCounts();
       console.log("Fetched on-chain package counts:", onChainCounts);
-      globalMinted['angel-fish'] = onChainCounts[1] ?? 0;
       globalMinted['cod-fish']   = onChainCounts[2] ?? 0;
       globalMinted['tuna-fish']  = onChainCounts[3] ?? 0;
       globalMinted['sword-fish'] = onChainCounts[4] ?? 0;
       globalMinted['king-fish']  = onChainCounts[5] ?? 0;
+      globalMinted['opah-fish']  = onChainCounts[6] ?? 0;
+      globalMinted['sail-fish']  = onChainCounts[7] ?? 0;
+      globalMinted['lion-fish']  = onChainCounts[8] ?? 0;
     } catch (error) {
       console.warn("On-chain mint counts not available:", error);
     }
@@ -376,7 +406,7 @@ function sleep(ms) {
 // Update fetchAllMintCounts to call fetchMintCountForPackage sequentially with a delay
 async function fetchAllMintCounts() {
   const counts = {};
-  for (let pkgId = 1; pkgId <= 5; pkgId++) {
+  for (let pkgId = 1; pkgId <= 8; pkgId++) {
     counts[pkgId] = await fetchMintCountForPackage(pkgId);
     await sleep(200); // 200ms delay between calls
   }
